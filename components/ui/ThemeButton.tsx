@@ -90,7 +90,7 @@ export default function ThemeButton({
     isGhostOrLink && "items-center justify-center",
     fullWidth && !isGhostOrLink && "w-full",
     !fullWidth && !isGhostOrLink && "px-8",
-    sizeStyle.container,
+    variant !== "link" && sizeStyle.container,
     isDisabled ? disabledStyles[variant].container : styles.container,
     (leftIcon || rightIcon) && "flex-row",
     className,
