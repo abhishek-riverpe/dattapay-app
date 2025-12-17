@@ -1,5 +1,6 @@
 import SignOutButton from "@/components/SignOutButton";
 import ThemeToggle from "@/components/ThemeToggle";
+import EmptyState from "@/components/ui/EmptyState";
 import IconCircle from "@/components/ui/IconCircle";
 import QuickAction from "@/components/ui/QuickAction";
 import ThemeButton from "@/components/ui/ThemeButton";
@@ -78,13 +79,11 @@ export default function HomeScreen() {
             </View>
 
             <View className="bg-white dark:bg-gray-900 rounded-2xl p-6 items-center justify-center flex-1 max-h-48">
-              <IconCircle icon="📋" size="lg" color="gray" className="mb-4" />
-              <Text className="text-gray-900 dark:text-white font-semibold text-base mb-1">
-                No transactions yet
-              </Text>
-              <Text className="text-gray-500 dark:text-gray-400 text-sm text-center">
-                Your recent activity will appear here
-              </Text>
+              <EmptyState
+                icon="📋"
+                title="No transactions yet"
+                description="Your recent activity will appear here"
+              />
             </View>
           </View>
 
