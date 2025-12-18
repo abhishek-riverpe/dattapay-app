@@ -66,7 +66,7 @@ export default function SignUpScreen() {
               console.log(session?.currentTask);
               return;
             }
-            router.replace("/");
+            router.replace("/(account)/complete-account");
           },
         });
         router.replace("/");

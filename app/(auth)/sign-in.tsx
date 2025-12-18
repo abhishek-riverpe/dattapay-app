@@ -46,7 +46,7 @@ export default function SignInScreen() {
               console.log(session?.currentTask);
               return;
             }
-            router.replace("/");
+            router.replace("/(account)/complete-account");
           },
         });
       } else if (signInAttempt.status === "needs_second_factor") {
@@ -92,7 +92,7 @@ export default function SignInScreen() {
               console.log(session?.currentTask);
               return;
             }
-            router.replace("/");
+            router.replace("/(account)/complete-account");
           },
         });
       } else {

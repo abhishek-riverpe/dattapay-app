@@ -30,7 +30,7 @@ export default function AppleSignInButton({
         if (onSignInComplete) {
           onSignInComplete();
         } else {
-          router.replace("/");
+          router.replace("/(account)/complete-account");
         }
       }
     } catch (err: any) {

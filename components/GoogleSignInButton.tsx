@@ -49,7 +49,7 @@ export default function GoogleSignInButton({
         if (onSignInComplete) {
           onSignInComplete();
         } else {
-          router.replace("/");
+          router.replace("/(account)/complete-account");
         }
       }
     } catch (err: any) {
