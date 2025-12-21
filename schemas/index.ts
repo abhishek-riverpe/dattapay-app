@@ -101,8 +101,8 @@ export type PersonalInfoFormData = yup.InferType<typeof personalInfoSchema>;
 // =====================================
 export const addressSchema = yup.object({
   addressLine1: yup.string().required("Address line 1 is required"),
-  addressLine2: yup.string().optional(),
-  locality: yup.string().optional(),
+  addressLine2: yup.string().default(""),
+  locality: yup.string().default(""),
   city: yup.string().required("City is required"),
   state: yup.string().required("State/Province is required"),
   country: yup.string().required("Country is required"),
