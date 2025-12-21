@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import { useColorScheme } from "nativewind";
+import { AuthTokenProvider } from "@/components/AuthTokenProvider";
 import "./global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -44,11 +45,13 @@ export default function RootLayout() {
     <ThemeProvider>
       <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
         <ClerkLoaded>
-          <SafeAreaProvider>
-            <ThemeWrapper>
-              <Slot />
-            </ThemeWrapper>
-          </SafeAreaProvider>
+          <AuthTokenProvider>
+            <SafeAreaProvider>
+              <ThemeWrapper>
+                <Slot />
+              </ThemeWrapper>
+            </SafeAreaProvider>
+          </AuthTokenProvider>
         </ClerkLoaded>
       </ClerkProvider>
     </ThemeProvider>
