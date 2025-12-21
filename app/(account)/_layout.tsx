@@ -16,6 +16,7 @@ export default function AccountSetupLayout() {
       }}
     >
       <Stack.Screen name="complete-account" />
+      <Stack.Screen name="complete-address" />
       <Stack.Screen name="complete-kyc" />
     </Stack>
   );
