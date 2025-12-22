@@ -68,7 +68,7 @@ export default function CompleteAddressScreen() {
       } else {
         await apiClient.post("/addresses", data);
       }
-      router.replace("/(account)/complete-kyc");
+      router.replace("/(account)/active-account");
     } catch (err: any) {
       if (err instanceof AxiosError && err.response) {
         alert(err.response.data.message);
