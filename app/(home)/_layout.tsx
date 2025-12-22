@@ -19,7 +19,7 @@ export default function HomeLayout() {
           backgroundColor: isDark ? "#111111" : "#FFFFFF",
           borderTopColor: isDark ? "#1F1F1F" : "#F3F4F6",
           borderTopWidth: 1,
-          height: 65,
+          height: 85,
           paddingBottom: 8,
           paddingTop: 8,
         },
