@@ -5,7 +5,13 @@ import apiClient from "@/lib/api-client";
 import { useKycStore } from "@/store";
 import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
-import { AlertTriangle, ChevronLeft, FileCheck, FileText, Shield } from "lucide-react-native";
+import {
+  AlertTriangle,
+  ChevronLeft,
+  FileCheck,
+  FileText,
+  Shield,
+} from "lucide-react-native";
 import * as React from "react";
 import * as Linking from "expo-linking";
 import {
@@ -24,7 +30,7 @@ export default function CompleteKYCScreen() {
   const { kycLink, tosLink, setKycData } = useKycStore();
   const { data: currentUserResponse } = useCurrentUser();
   const currentUser = currentUserResponse?.data;
-  const isAccountActive = currentUser?.accountStatus === "ACTIVE";
+  const isAccountActive = currentUser?.accountStatus === "PENDING";
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState("");
@@ -79,7 +85,7 @@ export default function CompleteKYCScreen() {
           <View className="flex-1 px-6 pt-6">
             {/* Back Button */}
             <Pressable
-              onPress={() => router.push("/(account)/active-account")}
+              onPress={() => router.push("/(account)/submit-account")}
               className="flex-row items-center mb-4"
             >
               <ChevronLeft size={24} color={isDark ? "#fff" : "#000"} />
@@ -111,23 +117,24 @@ export default function CompleteKYCScreen() {
               </View>
             ) : null}
 
-            {/* Account Not Active Warning */}
+            {/* Account Not Submitted Warning */}
             {!isAccountActive && (
               <Pressable
-                onPress={() => router.push("/(account)/active-account")}
+                onPress={() => router.push("/(account)/submit-account")}
                 className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6"
               >
                 <View className="flex-row items-center mb-2">
                   <AlertTriangle size={20} color="#f59e0b" />
                   <Text className="text-amber-800 dark:text-amber-300 text-sm font-medium ml-2">
-                    Account Not Activated
+                    Account Not Submitted
                   </Text>
                 </View>
                 <Text className="text-amber-700 dark:text-amber-400 text-sm">
-                  Please activate your account first before starting KYC verification.
+                  Please submit your account first before starting KYC
+                  verification.
                 </Text>
                 <Text className="text-amber-600 dark:text-amber-300 text-sm font-medium mt-2 underline">
-                  Go to Account Activation
+                  Go to Account Submission
                 </Text>
               </Pressable>
             )}
@@ -162,7 +169,9 @@ export default function CompleteKYCScreen() {
                     className="flex-row items-center justify-center gap-2"
                   >
                     <FileCheck size={20} color="#fff" />
-                    <Text className="text-white font-semibold">Complete KYC Verification</Text>
+                    <Text className="text-white font-semibold">
+                      Complete KYC Verification
+                    </Text>
                   </ThemeButton>
                   <ThemeButton
                     variant="secondary"
@@ -170,7 +179,13 @@ export default function CompleteKYCScreen() {
                     className="flex-row items-center justify-center gap-2"
                   >
                     <FileText size={20} color={isDark ? "#fff" : "#005AEE"} />
-                    <Text className={isDark ? "text-white font-semibold" : "text-primary font-semibold"}>
+                    <Text
+                      className={
+                        isDark
+                          ? "text-white font-semibold"
+                          : "text-primary font-semibold"
+                      }
+                    >
                       Accept Terms of Service
                     </Text>
                   </ThemeButton>

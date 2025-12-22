@@ -1,6 +1,7 @@
 import ThemeButton from "@/components/ui/ThemeButton";
 import ThemeTextInput from "@/components/ui/ThemeTextInput";
 import CountryPicker from "@/components/ui/CountryPicker";
+import SignOutButton from "@/components/SignOutButton";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
 import { PersonalInfoFormData, personalInfoSchema } from "@/schemas";
@@ -12,7 +13,7 @@ import { useRouter } from "expo-router";
 import * as React from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-  KeyboardAvoidingView,
+  Keyboard,
   Platform,
   ScrollView,
   Text,
@@ -28,6 +29,24 @@ export default function CompleteAccountScreen() {
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [serverError, setServerError] = React.useState("");
+  const [keyboardHeight, setKeyboardHeight] = React.useState(0);
+
+  React.useEffect(() => {
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSubscription = Keyboard.addListener(showEvent, (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSubscription = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   const {
     control,
@@ -111,15 +130,12 @@ export default function CompleteAccountScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-[#121212]">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: keyboardHeight + 40 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View className="flex-1 px-6 pt-6">
+          <View className="px-6 pt-6 pb-8">
             {/* Header */}
             <View className="mb-6">
               <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -287,20 +303,29 @@ export default function CompleteAccountScreen() {
                 Continue
               </ThemeButton>
 
-              <ThemeButton
-                variant="ghost"
-                onPress={() => router.push("/(account)/complete-address")}
-                className="mt-3"
-              >
-                Skip for now
-              </ThemeButton>
-              <Text className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
-                You can complete this later from your account settings
-              </Text>
+              {currentUser && (
+                <>
+                  <ThemeButton
+                    variant="ghost"
+                    onPress={() => router.push("/(account)/complete-address")}
+                    className="mt-3"
+                  >
+                    Skip for now
+                  </ThemeButton>
+                  <Text className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+                    You can complete this later from your account settings
+                  </Text>
+                </>
+              )}
+
+              {!currentUser && (
+                <View className="mt-4">
+                  <SignOutButton />
+                </View>
+              )}
             </View>
           </View>
         </ScrollView>
-      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

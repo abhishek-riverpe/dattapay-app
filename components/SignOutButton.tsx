@@ -1,15 +1,21 @@
 import { useClerk } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
 import { Text } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
 import ThemeButton from "@/components/ui/ThemeButton";
+import { useKycStore } from "@/store";
 
 export default function SignOutButton() {
   const { signOut } = useClerk();
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { clearKycData } = useKycStore();
 
   const handleSignOut = async () => {
     try {
       await signOut();
+      queryClient.clear();
+      clearKycData();
       router.replace("/(auth)/sign-in");
     } catch (err) {
       console.error(JSON.stringify(err, null, 2));

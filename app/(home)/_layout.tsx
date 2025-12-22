@@ -1,14 +1,21 @@
 import { Redirect, Tabs } from "expo-router";
 import { useAuth } from "@clerk/clerk-expo";
 import { useTheme } from "@/context/ThemeContext";
+import useCurrentUser from "@/hooks/useCurrentUser";
 import { Home, Clock, Wallet, User } from "lucide-react-native";
 
 export default function HomeLayout() {
   const { isSignedIn } = useAuth();
   const { isDark } = useTheme();
+  const { data: currentUserResponse } = useCurrentUser();
+  const currentUser = currentUserResponse?.data;
 
   if (!isSignedIn) {
     return <Redirect href="/(auth)/sign-in" />;
+  }
+
+  if (!currentUser) {
+    return <Redirect href="/(account)/complete-account" />;
   }
 
   return (

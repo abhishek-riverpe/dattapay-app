@@ -1,9 +1,17 @@
 import ThemeButton from "@/components/ui/ThemeButton";
 import { useTheme } from "@/context/ThemeContext";
+import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
 import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
-import { CheckCircle, ChevronLeft, MapPin, Rocket, User } from "lucide-react-native";
+import {
+  AlertTriangle,
+  CheckCircle,
+  ChevronLeft,
+  MapPin,
+  Rocket,
+  User,
+} from "lucide-react-native";
 import * as React from "react";
 import {
   KeyboardAvoidingView,
@@ -15,14 +23,17 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function ActiveAccountScreen() {
+export default function SubmitAccountScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
+  const { data: currentUserResponse } = useCurrentUser();
+  const currentUser = currentUserResponse?.data;
+  const isPendingKyc = currentUser?.accountStatus === "PENDING";
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState("");
 
-  const handleActivateAccount = async () => {
+  const handleSubmitAccount = async () => {
     setIsLoading(true);
     setError("");
 
@@ -31,9 +42,9 @@ export default function ActiveAccountScreen() {
       router.replace("/(account)/complete-kyc");
     } catch (err) {
       if (err instanceof AxiosError && err.response) {
-        setError(err.response.data.message || "Failed to activate account");
+        setError(err.response.data.message || "Failed to submit account");
       } else {
-        setError("Failed to activate account");
+        setError("Failed to submit account");
       }
     } finally {
       setIsLoading(false);
@@ -76,10 +87,10 @@ export default function ActiveAccountScreen() {
                 <Rocket size={32} color="#005AEE" />
               </View>
               <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Activate Your Account
+                Submit Your Account
               </Text>
               <Text className="text-base text-gray-600 dark:text-gray-400">
-                Review your information and activate your account to continue.
+                Review your information and submit your account to continue.
               </Text>
             </View>
 
@@ -143,19 +154,44 @@ export default function ActiveAccountScreen() {
                 What happens next?
               </Text>
               <Text className="text-blue-700 dark:text-blue-400 text-sm">
-                After activating your account, you'll be guided through the KYC
+                After submitting your account, you'll be guided through the KYC
                 verification process to unlock all features.
               </Text>
             </View>
 
-            {/* Activate Button */}
+            {/* KYC Pending Warning */}
+            {isPendingKyc && (
+              <Pressable
+                onPress={() => router.push("/(account)/complete-kyc")}
+                className="mb-6"
+              >
+                <View className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+                  <View className="flex-row items-center mb-2">
+                    <AlertTriangle size={20} color="#f59e0b" />
+                    <Text className="text-amber-800 dark:text-amber-300 text-sm font-medium ml-2">
+                      Account Pending
+                    </Text>
+                  </View>
+                  <Text className="text-amber-700 dark:text-amber-400 text-sm">
+                    Your account is pending. Please complete KYC verification to
+                    unlock all features.
+                  </Text>
+                  <Text className="text-amber-600 dark:text-amber-300 text-sm font-medium mt-2 underline">
+                    Complete KYC
+                  </Text>
+                </View>
+              </Pressable>
+            )}
+
+            {/* Submit Button */}
             <View className="mb-6">
               <ThemeButton
                 variant="primary"
-                onPress={handleActivateAccount}
+                onPress={handleSubmitAccount}
                 loading={isLoading}
+                disabled={isPendingKyc}
               >
-                Activate Account
+                Submit Account
               </ThemeButton>
 
               <ThemeButton

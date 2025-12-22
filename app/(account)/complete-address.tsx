@@ -1,5 +1,6 @@
 import ThemeButton from "@/components/ui/ThemeButton";
 import ThemeTextInput from "@/components/ui/ThemeTextInput";
+import CountrySelector from "@/components/ui/CountrySelector";
 import { useTheme } from "@/context/ThemeContext";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
@@ -11,7 +12,7 @@ import { ChevronLeft } from "lucide-react-native";
 import * as React from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-  KeyboardAvoidingView,
+  Keyboard,
   Platform,
   Pressable,
   ScrollView,
@@ -28,6 +29,24 @@ export default function CompleteAddressScreen() {
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [serverError, setServerError] = React.useState("");
+  const [keyboardHeight, setKeyboardHeight] = React.useState(0);
+
+  React.useEffect(() => {
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSubscription = Keyboard.addListener(showEvent, (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSubscription = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   const {
     control,
@@ -72,7 +91,12 @@ export default function CompleteAddressScreen() {
       } else {
         await apiClient.post("/addresses", data);
       }
-      router.replace("/(account)/active-account");
+
+      if (currentUser?.accountStatus === "PENDING") {
+        router.replace("/(account)/complete-kyc");
+      } else {
+        router.replace("/(account)/submit-account");
+      }
     } catch (err: any) {
       if (err instanceof AxiosError && err.response) {
         alert(err.response.data.message);
@@ -86,15 +110,12 @@ export default function CompleteAddressScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-[#121212]">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: keyboardHeight + 40 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View className="flex-1 px-6 pt-6">
+          <View className="px-6 pt-6 pb-8">
             {/* Back Button */}
             <Pressable
               onPress={() => router.push("/(account)/complete-account")}
@@ -250,11 +271,10 @@ export default function CompleteAddressScreen() {
                   field: { onChange, value },
                   fieldState: { error },
                 }) => (
-                  <ThemeTextInput
+                  <CountrySelector
                     label="Country"
-                    placeholder="Country"
                     value={value}
-                    onChangeText={onChange}
+                    onSelect={onChange}
                     errorMessage={error?.message}
                   />
                 )}
@@ -274,7 +294,7 @@ export default function CompleteAddressScreen() {
 
               <ThemeButton
                 variant="ghost"
-                onPress={() => router.push("/(account)/active-account")}
+                onPress={() => router.push("/(account)/submit-account")}
                 className="mt-3"
               >
                 Skip for now
@@ -285,7 +305,6 @@ export default function CompleteAddressScreen() {
             </View>
           </View>
         </ScrollView>
-      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

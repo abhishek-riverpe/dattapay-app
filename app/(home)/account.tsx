@@ -14,6 +14,7 @@ export default function AccountScreen() {
   const { data: currentUserResponse } = useCurrentUser();
   const currentUser = currentUserResponse?.data;
   const isAccountActive = currentUser?.accountStatus === "ACTIVE";
+  const isPendingKyc = currentUser?.accountStatus === "PENDING";
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-[#1A1A1A]">
@@ -59,24 +60,47 @@ export default function AccountScreen() {
           </View>
         </View>
 
-        {/* Account Not Active Warning */}
-        {!isAccountActive && currentUser && (
+        {/* KYC Pending Warning */}
+        {isPendingKyc && (
           <Pressable
-            onPress={() => router.push("/(account)/active-account")}
+            onPress={() => router.push("/(account)/complete-kyc")}
             className="px-6 mb-4"
           >
             <View className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4">
               <View className="flex-row items-center mb-2">
                 <AlertTriangle size={20} color="#f59e0b" />
                 <Text className="text-amber-800 dark:text-amber-300 text-sm font-medium ml-2">
-                  Account Not Activated
+                  KYC Verification Required
                 </Text>
               </View>
               <Text className="text-amber-700 dark:text-amber-400 text-sm">
-                Activate your account to unlock all features.
+                Complete your KYC verification to unlock all features.
               </Text>
               <Text className="text-amber-600 dark:text-amber-300 text-sm font-medium mt-2 underline">
-                Activate Now
+                Complete KYC
+              </Text>
+            </View>
+          </Pressable>
+        )}
+
+        {/* Account Not Submitted Warning */}
+        {!isAccountActive && !isPendingKyc && currentUser && (
+          <Pressable
+            onPress={() => router.push("/(account)/submit-account")}
+            className="px-6 mb-4"
+          >
+            <View className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4">
+              <View className="flex-row items-center mb-2">
+                <AlertTriangle size={20} color="#f59e0b" />
+                <Text className="text-amber-800 dark:text-amber-300 text-sm font-medium ml-2">
+                  Account Not Submitted
+                </Text>
+              </View>
+              <Text className="text-amber-700 dark:text-amber-400 text-sm">
+                Submit your account to unlock all features.
+              </Text>
+              <Text className="text-amber-600 dark:text-amber-300 text-sm font-medium mt-2 underline">
+                Submit Now
               </Text>
             </View>
           </Pressable>

@@ -24,9 +24,9 @@ export default function AccountIndex() {
     return <Redirect href="/(account)/complete-address" />;
   }
 
-  // Has both but account status is PENDING - go to active account
+  // Has both but account status is PENDING - go to complete kyc
   if (currentUser.accountStatus === "PENDING") {
-    return <Redirect href="/(account)/active-account" />;
+    return <Redirect href="/(account)/complete-kyc" />;
   }
 
   // All complete - go to home

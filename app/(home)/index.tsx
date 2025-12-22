@@ -132,23 +132,23 @@ export default function HomeScreen() {
               </Text>
             </View>
 
-            {/* Account Not Active Warning */}
+            {/* Account Not Submitted Warning */}
             {!isAccountActive && user?.data && (
               <Pressable
                 onPress={() => {
                   setShowDropdown(false);
-                  router.push("/(account)/active-account");
+                  router.push("/(account)/submit-account");
                 }}
                 className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 mb-3"
               >
                 <View className="flex-row items-center mb-1">
                   <AlertTriangle size={16} color="#f59e0b" />
                   <Text className="text-amber-800 dark:text-amber-300 text-xs font-medium ml-1">
-                    Account Not Active
+                    Account Not Submitted
                   </Text>
                 </View>
                 <Text className="text-amber-600 dark:text-amber-300 text-xs underline">
-                  Activate Now
+                  Submit Now
                 </Text>
               </Pressable>
             )}
