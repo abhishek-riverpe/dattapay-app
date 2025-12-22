@@ -1,8 +1,10 @@
 import ThemeButton from "@/components/ui/ThemeButton";
 import ThemeTextInput from "@/components/ui/ThemeTextInput";
+import CountryPicker from "@/components/ui/CountryPicker";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
 import { PersonalInfoFormData, personalInfoSchema } from "@/schemas";
+import { Country } from "@/constants/countries";
 import { useUser } from "@clerk/clerk-expo";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AxiosError } from "axios";
@@ -31,6 +33,7 @@ export default function CompleteAccountScreen() {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<PersonalInfoFormData>({
     resolver: yupResolver(personalInfoSchema),
@@ -40,7 +43,7 @@ export default function CompleteAccountScreen() {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
       email: user?.emailAddresses[0]?.emailAddress || "",
-      phoneNumberPrefix: "+1",
+      phoneNumberPrefix: "",
       phoneNumber: "",
       nationality: "",
       dateOfBirth: "",
@@ -59,7 +62,7 @@ export default function CompleteAccountScreen() {
         firstName: currentUser.firstName,
         lastName: currentUser.lastName,
         email: currentUser.email,
-        phoneNumberPrefix: currentUser.phoneNumberPrefix,
+        phoneNumberPrefix: currentUser.phoneNumberPrefix?.replace("+", "") || "",
         phoneNumber: currentUser.phoneNumber,
         nationality: currentUser.nationality,
         dateOfBirth: dateOfBirth,
@@ -70,7 +73,7 @@ export default function CompleteAccountScreen() {
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         email: user.emailAddresses[0]?.emailAddress || "",
-        phoneNumberPrefix: "+1",
+        phoneNumberPrefix: "1",
         phoneNumber: "",
         nationality: "",
         dateOfBirth: "",
@@ -100,6 +103,11 @@ export default function CompleteAccountScreen() {
   };
 
   const hasErrors = Object.keys(errors).length > 0;
+
+  const handleCountrySelect = (country: Country) => {
+    setValue("phoneNumberPrefix", country.dialCode.replace("+", ""));
+    setValue("nationality", country.code);
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-[#121212]">
@@ -132,42 +140,44 @@ export default function CompleteAccountScreen() {
             ) : null}
 
             {/* Form Fields */}
-            <View className="mb-4">
-              <Controller
-                name="firstName"
-                control={control}
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }) => (
-                  <ThemeTextInput
-                    label="First Name"
-                    placeholder="Enter your first name"
-                    value={value}
-                    onChangeText={onChange}
-                    errorMessage={error?.message}
-                  />
-                )}
-              />
-            </View>
-
-            <View className="mb-4">
-              <Controller
-                name="lastName"
-                control={control}
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }) => (
-                  <ThemeTextInput
-                    label="Last Name"
-                    placeholder="Enter your last name"
-                    value={value}
-                    onChangeText={onChange}
-                    errorMessage={error?.message}
-                  />
-                )}
-              />
+            {/* Row 1: First Name & Last Name */}
+            <View className="flex-row mb-4 gap-3">
+              <View className="flex-1">
+                <Controller
+                  name="firstName"
+                  control={control}
+                  render={({
+                    field: { onChange, value },
+                    fieldState: { error },
+                  }) => (
+                    <ThemeTextInput
+                      label="First Name"
+                      placeholder="First name"
+                      value={value}
+                      onChangeText={onChange}
+                      errorMessage={error?.message}
+                    />
+                  )}
+                />
+              </View>
+              <View className="flex-1">
+                <Controller
+                  name="lastName"
+                  control={control}
+                  render={({
+                    field: { onChange, value },
+                    fieldState: { error },
+                  }) => (
+                    <ThemeTextInput
+                      label="Last Name"
+                      placeholder="Last name"
+                      value={value}
+                      onChangeText={onChange}
+                      errorMessage={error?.message}
+                    />
+                  )}
+                />
+              </View>
             </View>
 
             <View className="mb-4">
@@ -190,76 +200,70 @@ export default function CompleteAccountScreen() {
               />
             </View>
 
-            <View className="mb-4">
-              <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Phone Number
-              </Text>
-              <View className="flex-row">
-                <View className="w-24 mr-2">
-                  <Controller
-                    name="phoneNumberPrefix"
-                    control={control}
-                    render={({
-                      field: { onChange, value },
-                      fieldState: { error },
-                    }) => (
-                      <ThemeTextInput
-                        placeholder="+1"
-                        value={value}
-                        onChangeText={onChange}
-                        errorMessage={error?.message}
-                      />
-                    )}
-                  />
-                </View>
-                <View className="flex-1">
-                  <Controller
-                    name="phoneNumber"
-                    control={control}
-                    render={({
-                      field: { onChange, value },
-                      fieldState: { error },
-                    }) => (
-                      <ThemeTextInput
-                        placeholder="Enter phone number"
-                        value={value}
-                        onChangeText={onChange}
-                        errorMessage={error?.message}
-                      />
-                    )}
-                  />
-                </View>
+            {/* Row 2: Country Picker & Phone Number */}
+            <View className="flex-row mb-4 gap-3">
+              <View className="w-28">
+                <Controller
+                  name="phoneNumberPrefix"
+                  control={control}
+                  render={({ field: { value }, fieldState: { error } }) => (
+                    <CountryPicker
+                      label="Code"
+                      value={value}
+                      onSelect={handleCountrySelect}
+                      errorMessage={error?.message}
+                    />
+                  )}
+                />
+              </View>
+              <View className="flex-1">
+                <Controller
+                  name="phoneNumber"
+                  control={control}
+                  render={({
+                    field: { onChange, value },
+                    fieldState: { error },
+                  }) => (
+                    <ThemeTextInput
+                      label="Phone Number"
+                      placeholder="Phone number"
+                      value={value}
+                      onChangeText={onChange}
+                      errorMessage={error?.message}
+                    />
+                  )}
+                />
               </View>
             </View>
 
-            <View className="mb-4">
-              <Controller
-                name="nationality"
-                control={control}
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }) => (
-                  <ThemeTextInput
-                    label="Nationality"
-                    placeholder="Enter your nationality"
-                    value={value}
-                    onChangeText={onChange}
-                    errorMessage={error?.message}
-                  />
-                )}
-              />
-            </View>
-
-            <View className="mb-4">
-              <Controller
-                name="dateOfBirth"
-                control={control}
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }) => (
-                  <>
+            {/* Row 3: Nationality & Date of Birth */}
+            <View className="flex-row mb-4 gap-3">
+              <View className="flex-1">
+                <Controller
+                  name="nationality"
+                  control={control}
+                  render={({
+                    field: { onChange, value },
+                    fieldState: { error },
+                  }) => (
+                    <ThemeTextInput
+                      label="Nationality"
+                      placeholder="Nationality"
+                      value={value}
+                      onChangeText={onChange}
+                      errorMessage={error?.message}
+                    />
+                  )}
+                />
+              </View>
+              <View className="flex-1">
+                <Controller
+                  name="dateOfBirth"
+                  control={control}
+                  render={({
+                    field: { onChange, value },
+                    fieldState: { error },
+                  }) => (
                     <ThemeTextInput
                       label="Date of Birth"
                       placeholder="YYYY-MM-DD"
@@ -267,14 +271,9 @@ export default function CompleteAccountScreen() {
                       onChangeText={onChange}
                       errorMessage={error?.message}
                     />
-                    {!error && (
-                      <Text className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Format: YYYY-MM-DD (e.g., 1990-01-15)
-                      </Text>
-                    )}
-                  </>
-                )}
-              />
+                  )}
+                />
+              </View>
             </View>
 
             {/* Submit Button */}

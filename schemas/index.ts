@@ -63,7 +63,7 @@ export const personalInfoSchema = yup.object({
   phoneNumberPrefix: yup
     .string()
     .required("Country code is required")
-    .matches(/^\+\d{1,4}$/, "Invalid country code (e.g., +1)"),
+    .matches(/^\d{1,4}$/, "Invalid country code"),
   phoneNumber: yup
     .string()
     .required("Phone number is required")
