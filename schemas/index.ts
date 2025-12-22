@@ -111,3 +111,39 @@ export const addressSchema = yup.object({
 });
 
 export type AddressFormData = yup.InferType<typeof addressSchema>;
+
+export type APIResponse<T> = {
+  success: boolean;
+  message: string;
+  data: T;
+};
+
+export type Address = {
+  id: number;
+  addressLine1: string;
+  addressLine2: string;
+  locality: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+  created_at: Date;
+  updated_at: Date;
+};
+
+export type User = {
+  id: number;
+  firstName: string;
+  clerkUserId: string;
+  zynkEntityId: string;
+  zynkFundingAccountId: string;
+  lastName: string;
+  email: string;
+  phoneNumberPrefix: string;
+  phoneNumber: string;
+  nationality: string;
+  dateOfBirth: Date;
+  address: Address;
+  created_at: Date;
+  updated_at: Date;
+};

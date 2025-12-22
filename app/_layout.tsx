@@ -1,12 +1,14 @@
+import { ThemeProvider, useTheme } from "@/context/ThemeContext";
+import queryClient from "@/lib/query-client";
 import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import { useColorScheme } from "nativewind";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { ThemeProvider, useTheme } from "@/context/ThemeContext";
-import { useColorScheme } from "nativewind";
 import "./global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -46,7 +48,9 @@ export default function RootLayout() {
         <ClerkLoaded>
           <SafeAreaProvider>
             <ThemeWrapper>
-              <Slot />
+              <QueryClientProvider client={queryClient}>
+                <Slot />
+              </QueryClientProvider>
             </ThemeWrapper>
           </SafeAreaProvider>
         </ClerkLoaded>
