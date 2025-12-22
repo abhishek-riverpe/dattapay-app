@@ -3,12 +3,19 @@ import EmptyState from "@/components/ui/EmptyState";
 import IconCircle from "@/components/ui/IconCircle";
 import QuickAction from "@/components/ui/QuickAction";
 import ThemeButton from "@/components/ui/ThemeButton";
-import { useUser } from "@clerk/clerk-expo";
-import { Text, View } from "react-native";
+import useCurrentUser from "@/hooks/useCurrentUser";
+import SignOutButton from "@/components/SignOutButton";
+import { useState } from "react";
+import { Text, View, Pressable, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { AlertTriangle } from "lucide-react-native";
 
 export default function HomeScreen() {
-  const { user } = useUser();
+  const { data: user } = useCurrentUser();
+  const router = useRouter();
+  const [showDropdown, setShowDropdown] = useState(false);
+  const isAccountActive = user?.data?.accountStatus === "ACTIVE";
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-[#1A1A1A]">
@@ -19,32 +26,30 @@ export default function HomeScreen() {
             <View>
               <Text className="text-primary-100 text-sm">Welcome back</Text>
               <Text className="text-white text-xl font-bold">
-                {user?.firstName ||
-                  user?.emailAddresses[0].emailAddress.split("@")[0]}
+                {user?.data.firstName || user?.data.email}
               </Text>
             </View>
             <View className="flex-row items-center gap-3">
               <ThemeToggle variant="icon" />
-              <IconCircle
-                size="md"
-                color="primary-solid"
-                icon={
-                  <Text className="text-white text-lg font-bold">
-                    {(
-                      user?.firstName?.[0] ||
-                      user?.emailAddresses[0].emailAddress[0]
-                    )?.toUpperCase()}
-                  </Text>
-                }
-              />
+              <Pressable onPress={() => setShowDropdown(true)}>
+                <IconCircle
+                  size="md"
+                  color="primary-solid"
+                  icon={
+                    <Text className="text-white text-lg font-bold">
+                      {(
+                        user?.data.firstName?.[0] || user?.data.email
+                      )?.toUpperCase()}
+                    </Text>
+                  }
+                />
+              </Pressable>
             </View>
           </View>
 
           {/* Balance Card */}
           <View className="bg-white/10 rounded-2xl p-5">
-            <Text className="text-primary-100 text-sm mb-1">
-              Total Balance
-            </Text>
+            <Text className="text-primary-100 text-sm mb-1">Total Balance</Text>
             <Text className="text-white text-4xl font-bold">$0.00</Text>
           </View>
         </View>
@@ -52,10 +57,30 @@ export default function HomeScreen() {
         {/* Quick Actions */}
         <View className="px-6 -mt-4">
           <View className="bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-sm flex-row justify-around">
-            <QuickAction icon="↑" label="Send" color="primary" onPress={() => {}} />
-            <QuickAction icon="↓" label="Receive" color="blue" onPress={() => {}} />
-            <QuickAction icon="+" label="Top Up" color="purple" onPress={() => {}} />
-            <QuickAction icon="⋯" label="More" color="orange" onPress={() => {}} />
+            <QuickAction
+              icon="↑"
+              label="Send"
+              color="primary"
+              onPress={() => {}}
+            />
+            <QuickAction
+              icon="↓"
+              label="Receive"
+              color="blue"
+              onPress={() => {}}
+            />
+            <QuickAction
+              icon="+"
+              label="Top Up"
+              color="purple"
+              onPress={() => {}}
+            />
+            <QuickAction
+              icon="⋯"
+              label="More"
+              color="orange"
+              onPress={() => {}}
+            />
           </View>
         </View>
 
@@ -84,6 +109,55 @@ export default function HomeScreen() {
           </View>
         </View>
       </View>
+
+      {/* Profile Dropdown Modal */}
+      <Modal
+        visible={showDropdown}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDropdown(false)}
+      >
+        <Pressable
+          className="flex-1"
+          onPress={() => setShowDropdown(false)}
+        >
+          <View className="absolute top-20 right-6 bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-lg min-w-[220px]">
+            {/* User Info */}
+            <View className="border-b border-gray-100 dark:border-gray-800 pb-3 mb-3">
+              <Text className="text-gray-900 dark:text-white font-semibold">
+                {user?.data.firstName} {user?.data.lastName}
+              </Text>
+              <Text className="text-gray-500 dark:text-gray-400 text-sm">
+                {user?.data.email}
+              </Text>
+            </View>
+
+            {/* Account Not Active Warning */}
+            {!isAccountActive && user?.data && (
+              <Pressable
+                onPress={() => {
+                  setShowDropdown(false);
+                  router.push("/(account)/active-account");
+                }}
+                className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 mb-3"
+              >
+                <View className="flex-row items-center mb-1">
+                  <AlertTriangle size={16} color="#f59e0b" />
+                  <Text className="text-amber-800 dark:text-amber-300 text-xs font-medium ml-1">
+                    Account Not Active
+                  </Text>
+                </View>
+                <Text className="text-amber-600 dark:text-amber-300 text-xs underline">
+                  Activate Now
+                </Text>
+              </Pressable>
+            )}
+
+            {/* Logout */}
+            <SignOutButton />
+          </View>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
