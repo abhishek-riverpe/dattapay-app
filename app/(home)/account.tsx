@@ -133,7 +133,7 @@ export default function AccountScreen() {
 
             {/* Account Status Row */}
             {currentUser && (
-              <View className="flex-row items-center p-4">
+              <View className="flex-row items-center p-4 border-b border-gray-100 dark:border-gray-800">
                 <IconCircle icon="✓" size="sm" color="gray" className="mr-3" />
                 <View className="flex-1">
                   <Text className="text-gray-500 dark:text-gray-400 text-xs">
@@ -151,6 +151,20 @@ export default function AccountScreen() {
                 </View>
               </View>
             )}
+
+            {/* Update Profile */}
+            <Pressable
+              onPress={() => router.push("/(account)/complete-account")}
+              className="flex-row items-center p-4"
+            >
+              <IconCircle icon="✏️" size="sm" color="gray" className="mr-3" />
+              <View className="flex-1">
+                <Text className="text-gray-900 dark:text-white text-sm font-medium">
+                  Update Profile
+                </Text>
+              </View>
+              <Text className="text-gray-400 text-lg">›</Text>
+            </Pressable>
           </View>
         </View>
 
