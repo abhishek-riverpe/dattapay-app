@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useUser } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
@@ -17,7 +17,7 @@ export default function AccountScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-[#1A1A1A]">
-      <View className="flex-1">
+      <ScrollView className="flex-1">
         {/* Header */}
         <View className="px-6 pt-4 pb-6">
           <Text className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -175,12 +175,12 @@ export default function AccountScreen() {
         </View>
 
         {/* App Info */}
-        <View className="flex-1 justify-end px-6 pb-6">
+        <View className="px-6 pt-6">
           <Text className="text-center text-xs text-gray-400 dark:text-gray-600">
             DattaPay v1.0.0
           </Text>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
