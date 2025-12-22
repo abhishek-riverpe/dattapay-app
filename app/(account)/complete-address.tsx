@@ -1,6 +1,7 @@
 import ThemeButton from "@/components/ui/ThemeButton";
 import ThemeTextInput from "@/components/ui/ThemeTextInput";
 import CountrySelector from "@/components/ui/CountrySelector";
+import SignOutButton from "@/components/SignOutButton";
 import { useTheme } from "@/context/ThemeContext";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
@@ -292,16 +293,26 @@ export default function CompleteAddressScreen() {
                 Submit & Continue to KYC
               </ThemeButton>
 
-              <ThemeButton
-                variant="ghost"
-                onPress={() => router.push("/(account)/submit-account")}
-                className="mt-3"
-              >
-                Skip for now
-              </ThemeButton>
-              <Text className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
-                You can complete this later from your account settings
-              </Text>
+              {currentUser?.address && (
+                <>
+                  <ThemeButton
+                    variant="ghost"
+                    onPress={() => router.push("/(account)/submit-account")}
+                    className="mt-3"
+                  >
+                    Skip for now
+                  </ThemeButton>
+                  <Text className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+                    You can complete this later from your account settings
+                  </Text>
+                </>
+              )}
+
+              {!currentUser?.address && (
+                <View className="mt-4">
+                  <SignOutButton />
+                </View>
+              )}
             </View>
           </View>
         </ScrollView>
