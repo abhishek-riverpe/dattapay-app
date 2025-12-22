@@ -1,5 +1,6 @@
 import ThemeButton from "@/components/ui/ThemeButton";
 import ThemeTextInput from "@/components/ui/ThemeTextInput";
+import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
 import { PersonalInfoFormData, personalInfoSchema } from "@/schemas";
 import { useUser } from "@clerk/clerk-expo";
@@ -20,6 +21,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function CompleteAccountScreen() {
   const router = useRouter();
   const { user } = useUser();
+  const { data: currentUserResponse } = useCurrentUser();
+  const currentUser = currentUserResponse?.data;
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [serverError, setServerError] = React.useState("");
@@ -27,6 +30,7 @@ export default function CompleteAccountScreen() {
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<PersonalInfoFormData>({
     resolver: yupResolver(personalInfoSchema),
@@ -42,6 +46,26 @@ export default function CompleteAccountScreen() {
       dateOfBirth: "",
     },
   });
+
+  React.useEffect(() => {
+    if (currentUser) {
+      const dateOfBirth =
+        currentUser.dateOfBirth instanceof Date
+          ? currentUser.dateOfBirth.toISOString().split("T")[0]
+          : String(currentUser.dateOfBirth).split("T")[0];
+
+      reset({
+        clerkUserId: currentUser.clerkUserId,
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        email: currentUser.email,
+        phoneNumberPrefix: currentUser.phoneNumberPrefix,
+        phoneNumber: currentUser.phoneNumber,
+        nationality: currentUser.nationality,
+        dateOfBirth: dateOfBirth,
+      });
+    }
+  }, [currentUser, reset]);
 
   const onSubmit = async (data: PersonalInfoFormData) => {
     setIsLoading(true);

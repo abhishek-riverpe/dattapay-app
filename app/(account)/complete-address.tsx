@@ -1,5 +1,6 @@
 import ThemeButton from "@/components/ui/ThemeButton";
 import ThemeTextInput from "@/components/ui/ThemeTextInput";
+import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
 import { AddressFormData, addressSchema } from "@/schemas";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -19,6 +20,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function CompleteAddressScreen() {
   const router = useRouter();
   const { userId } = useLocalSearchParams<{ userId: string }>();
+  const { data: currentUserResponse } = useCurrentUser();
+  const currentUser = currentUserResponse?.data;
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [serverError, setServerError] = React.useState("");
@@ -26,6 +29,7 @@ export default function CompleteAddressScreen() {
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<AddressFormData>({
     resolver: yupResolver(addressSchema),
@@ -41,6 +45,21 @@ export default function CompleteAddressScreen() {
       userId: 3,
     },
   });
+
+  React.useEffect(() => {
+    if (currentUser?.address) {
+      reset({
+        addressLine1: currentUser.address.addressLine1,
+        addressLine2: currentUser.address.addressLine2 || "",
+        locality: currentUser.address.locality || "",
+        city: currentUser.address.city,
+        state: currentUser.address.state,
+        country: currentUser.address.country,
+        postalCode: currentUser.address.postalCode,
+        userId: currentUser.id,
+      });
+    }
+  }, [currentUser, reset]);
 
   const onSubmit = async (data: AddressFormData) => {
     setIsLoading(true);
