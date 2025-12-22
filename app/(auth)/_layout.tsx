@@ -7,7 +7,7 @@ export default function AuthLayout() {
   const { isDark } = useTheme();
 
   if (isSignedIn) {
-    return <Redirect href={"/(account)/complete-account"} />;
+    return <Redirect href={"/(account)"} />;
   }
 
   return (

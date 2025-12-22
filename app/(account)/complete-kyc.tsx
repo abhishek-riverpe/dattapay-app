@@ -1,15 +1,17 @@
 import ThemeButton from "@/components/ui/ThemeButton";
 import { useTheme } from "@/context/ThemeContext";
+import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
 import { useKycStore } from "@/store";
 import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
-import { FileCheck, FileText, Shield } from "lucide-react-native";
+import { AlertTriangle, ChevronLeft, FileCheck, FileText, Shield } from "lucide-react-native";
 import * as React from "react";
 import * as Linking from "expo-linking";
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   Text,
   View,
@@ -20,6 +22,9 @@ export default function CompleteKYCScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
   const { kycLink, tosLink, setKycData } = useKycStore();
+  const { data: currentUserResponse } = useCurrentUser();
+  const currentUser = currentUserResponse?.data;
+  const isAccountActive = currentUser?.accountStatus === "ACTIVE";
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState("");
@@ -72,6 +77,17 @@ export default function CompleteKYCScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View className="flex-1 px-6 pt-6">
+            {/* Back Button */}
+            <Pressable
+              onPress={() => router.push("/(account)/active-account")}
+              className="flex-row items-center mb-4"
+            >
+              <ChevronLeft size={24} color={isDark ? "#fff" : "#000"} />
+              <Text className="text-base text-gray-600 dark:text-gray-300 ml-1">
+                Back
+              </Text>
+            </Pressable>
+
             {/* Header */}
             <View className="mb-8">
               <View className="w-16 h-16 rounded-full bg-primary/10 items-center justify-center mb-4">
@@ -95,6 +111,27 @@ export default function CompleteKYCScreen() {
               </View>
             ) : null}
 
+            {/* Account Not Active Warning */}
+            {!isAccountActive && (
+              <Pressable
+                onPress={() => router.push("/(account)/active-account")}
+                className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6"
+              >
+                <View className="flex-row items-center mb-2">
+                  <AlertTriangle size={20} color="#f59e0b" />
+                  <Text className="text-amber-800 dark:text-amber-300 text-sm font-medium ml-2">
+                    Account Not Activated
+                  </Text>
+                </View>
+                <Text className="text-amber-700 dark:text-amber-400 text-sm">
+                  Please activate your account first before starting KYC verification.
+                </Text>
+                <Text className="text-amber-600 dark:text-amber-300 text-sm font-medium mt-2 underline">
+                  Go to Account Activation
+                </Text>
+              </Pressable>
+            )}
+
             {/* Info Box */}
             <View className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-8">
               <Text className="text-blue-800 dark:text-blue-300 text-sm font-medium mb-1">
@@ -113,6 +150,7 @@ export default function CompleteKYCScreen() {
                   variant="primary"
                   onPress={handleStartKYC}
                   loading={isLoading}
+                  disabled={!isAccountActive}
                 >
                   Start KYC
                 </ThemeButton>

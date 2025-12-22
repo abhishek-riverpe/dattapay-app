@@ -3,7 +3,7 @@ import { useTheme } from "@/context/ThemeContext";
 import apiClient from "@/lib/api-client";
 import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
-import { CheckCircle, MapPin, Rocket, User } from "lucide-react-native";
+import { CheckCircle, ChevronLeft, MapPin, Rocket, User } from "lucide-react-native";
 import * as React from "react";
 import {
   KeyboardAvoidingView,
@@ -59,6 +59,17 @@ export default function ActiveAccountScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View className="flex-1 px-6 pt-6">
+            {/* Back Button */}
+            <Pressable
+              onPress={() => router.push("/(account)/complete-address")}
+              className="flex-row items-center mb-4"
+            >
+              <ChevronLeft size={24} color={isDark ? "#fff" : "#000"} />
+              <Text className="text-base text-gray-600 dark:text-gray-300 ml-1">
+                Back
+              </Text>
+            </Pressable>
+
             {/* Header */}
             <View className="mb-8">
               <View className="w-16 h-16 rounded-full bg-primary/10 items-center justify-center mb-4">
@@ -146,6 +157,17 @@ export default function ActiveAccountScreen() {
               >
                 Activate Account
               </ThemeButton>
+
+              <ThemeButton
+                variant="ghost"
+                onPress={() => router.push("/(account)/complete-kyc")}
+                className="mt-3"
+              >
+                Skip for now
+              </ThemeButton>
+              <Text className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+                You can complete this later from your account settings
+              </Text>
             </View>
           </View>
         </ScrollView>

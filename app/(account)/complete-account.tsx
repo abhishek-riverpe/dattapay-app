@@ -287,6 +287,17 @@ export default function CompleteAccountScreen() {
               >
                 Continue
               </ThemeButton>
+
+              <ThemeButton
+                variant="ghost"
+                onPress={() => router.push("/(account)/complete-address")}
+                className="mt-3"
+              >
+                Skip for now
+              </ThemeButton>
+              <Text className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+                You can complete this later from your account settings
+              </Text>
             </View>
           </View>
         </ScrollView>

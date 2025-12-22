@@ -101,10 +101,10 @@ export default function SignUpScreen() {
               console.log(session?.currentTask);
               return;
             }
-            router.replace("/(account)/complete-account");
+            router.replace("/(account)");
           },
         });
-        router.replace("/(account)/complete-account");
+        router.replace("/(account)");
       } else {
         console.error(JSON.stringify(signUpAttempt, null, 2));
       }

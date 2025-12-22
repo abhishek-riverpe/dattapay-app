@@ -1,16 +1,19 @@
 import ThemeButton from "@/components/ui/ThemeButton";
 import ThemeTextInput from "@/components/ui/ThemeTextInput";
+import { useTheme } from "@/context/ThemeContext";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
 import { AddressFormData, addressSchema } from "@/schemas";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
+import { ChevronLeft } from "lucide-react-native";
 import * as React from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   Text,
   View,
@@ -19,6 +22,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CompleteAddressScreen() {
   const router = useRouter();
+  const { isDark } = useTheme();
   const { data: currentUserResponse } = useCurrentUser();
   const currentUser = currentUserResponse?.data;
 
@@ -91,6 +95,17 @@ export default function CompleteAddressScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View className="flex-1 px-6 pt-6">
+            {/* Back Button */}
+            <Pressable
+              onPress={() => router.push("/(account)/complete-account")}
+              className="flex-row items-center mb-4"
+            >
+              <ChevronLeft size={24} color={isDark ? "#fff" : "#000"} />
+              <Text className="text-base text-gray-600 dark:text-gray-300 ml-1">
+                Back
+              </Text>
+            </Pressable>
+
             {/* Header */}
             <View className="mb-6">
               <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -256,6 +271,17 @@ export default function CompleteAddressScreen() {
               >
                 Submit & Continue to KYC
               </ThemeButton>
+
+              <ThemeButton
+                variant="ghost"
+                onPress={() => router.push("/(account)/active-account")}
+                className="mt-3"
+              >
+                Skip for now
+              </ThemeButton>
+              <Text className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+                You can complete this later from your account settings
+              </Text>
             </View>
           </View>
         </ScrollView>

@@ -141,6 +141,7 @@ export type User = {
   email: string;
   phoneNumberPrefix: string;
   phoneNumber: string;
+  accountStatus: string;
   nationality: string;
   dateOfBirth: Date;
   address: Address;
