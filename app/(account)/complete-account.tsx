@@ -64,20 +64,32 @@ export default function CompleteAccountScreen() {
         nationality: currentUser.nationality,
         dateOfBirth: dateOfBirth,
       });
+    } else if (user) {
+      reset({
+        clerkUserId: user.id || "",
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.emailAddresses[0]?.emailAddress || "",
+        phoneNumberPrefix: "+1",
+        phoneNumber: "",
+        nationality: "",
+        dateOfBirth: "",
+      });
     }
-  }, [currentUser, reset]);
+  }, [currentUser, user, reset]);
 
   const onSubmit = async (data: PersonalInfoFormData) => {
     setIsLoading(true);
     setServerError("");
 
     try {
-      const userId = 1;
-      await apiClient.post("/users", data);
-      router.push({
-        pathname: "/(account)/complete-address",
-        params: { userId: userId.toString() },
-      });
+      if (currentUser) {
+        const { clerkUserId, ...updateData } = data;
+        await apiClient.put("/users/update-user", updateData);
+      } else {
+        await apiClient.post("/users", data);
+      }
+      router.push("/(account)/complete-address");
     } catch (err) {
       if (err instanceof AxiosError && err.response) {
         alert(err.response.data.message);

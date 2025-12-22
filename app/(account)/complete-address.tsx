@@ -5,7 +5,7 @@ import apiClient from "@/lib/api-client";
 import { AddressFormData, addressSchema } from "@/schemas";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AxiosError } from "axios";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import * as React from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -19,7 +19,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CompleteAddressScreen() {
   const router = useRouter();
-  const { userId } = useLocalSearchParams<{ userId: string }>();
   const { data: currentUserResponse } = useCurrentUser();
   const currentUser = currentUserResponse?.data;
 
@@ -31,8 +30,8 @@ export default function CompleteAddressScreen() {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<AddressFormData>({
-    resolver: yupResolver(addressSchema),
+  } = useForm({
+    resolver: yupResolver(addressSchema.omit(["userId"])),
     mode: "onChange",
     defaultValues: {
       addressLine1: "",
@@ -42,7 +41,6 @@ export default function CompleteAddressScreen() {
       state: "",
       country: "",
       postalCode: "",
-      userId: 3,
     },
   });
 
@@ -56,17 +54,20 @@ export default function CompleteAddressScreen() {
         state: currentUser.address.state,
         country: currentUser.address.country,
         postalCode: currentUser.address.postalCode,
-        userId: currentUser.id,
       });
     }
   }, [currentUser, reset]);
 
-  const onSubmit = async (data: AddressFormData) => {
+  const onSubmit = async (data: Omit<AddressFormData, "userId">) => {
     setIsLoading(true);
     setServerError("");
 
     try {
-      await apiClient.post("/addresses", { ...data, userId: 3 });
+      if (currentUser?.address) {
+        await apiClient.put("/addresses", data);
+      } else {
+        await apiClient.post("/addresses", data);
+      }
       router.replace("/(account)/complete-kyc");
     } catch (err: any) {
       if (err instanceof AxiosError && err.response) {
