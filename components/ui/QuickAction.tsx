@@ -34,7 +34,7 @@ export default function QuickAction({
         className={`w-14 h-14 rounded-full items-center justify-center mb-2 ${colorStyles[color]}`}
       >
         {typeof icon === "string" ? (
-          <Text className="text-2xl">{icon}</Text>
+          <Text className="text-2xl font-semibold dark:text-white">{icon}</Text>
         ) : (
           icon
         )}
