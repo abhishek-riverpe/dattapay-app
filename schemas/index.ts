@@ -76,7 +76,7 @@ export const personalInfoSchema = yup.object({
     .test("valid-date", "Invalid date", (value) => {
       if (!value) return false;
       const date = new Date(value);
-      return !isNaN(date.getTime());
+      return !Number.isNaN(date.getTime());
     })
     .test("min-age", "You must be at least 18 years old", (value) => {
       if (!value) return false;
