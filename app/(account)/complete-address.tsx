@@ -292,12 +292,8 @@ export default function CompleteAddressScreen() {
               disabled={hasErrors}
               loading={isLoading}
             >
-              {currentUser &&
-                currentUser.accountStatus === "ACTIVE" &&
-                "Update"}
-              {currentUser &&
-                currentUser.accountStatus === "PENDING" &&
-                "Update"}
+              {currentUser?.accountStatus === "ACTIVE" && "Update"}
+              {currentUser?.accountStatus === "PENDING" && "Update"}
               {!currentUser && "Submit"}
             </ThemeButton>
 

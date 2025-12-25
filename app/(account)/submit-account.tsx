@@ -32,9 +32,9 @@ export default function SubmitAccountScreen() {
 
   React.useEffect(() => {
     if (!currentUser) return router.push("/(account)/complete-account");
-    if (currentUser && currentUser.accountStatus === "PENDING")
+    if (currentUser?.accountStatus === "PENDING")
       return router.push("/(account)/complete-kyc");
-    if (currentUser && currentUser.accountStatus === "ACTIVE")
+    if (currentUser?.accountStatus === "ACTIVE")
       return router.push("/(home)");
   }, [currentUser]);
 

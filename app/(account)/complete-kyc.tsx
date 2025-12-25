@@ -37,7 +37,7 @@ export default function CompleteKYCScreen() {
 
   React.useEffect(() => {
     if (!currentUser) return router.push("/(account)/complete-account");
-    if (currentUser && currentUser.accountStatus === "ACTIVE")
+    if (currentUser?.accountStatus === "ACTIVE")
       return router.push("/(home)");
   }, [currentUser]);
 
