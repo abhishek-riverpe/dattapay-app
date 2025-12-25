@@ -6,6 +6,8 @@ const useCurrentUser = () =>
   useQuery<APIResponse<User>>({
     queryKey: ["current"],
     queryFn: () => apiClient.get("/users/me").then((res) => res.data),
+
+    refetchInterval: 10_000,
   });
 
 export default useCurrentUser;

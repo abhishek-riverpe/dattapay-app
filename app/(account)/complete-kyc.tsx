@@ -35,6 +35,12 @@ export default function CompleteKYCScreen() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState("");
 
+  React.useEffect(() => {
+    if (!currentUser) return router.push("/(account)/complete-account");
+    if (currentUser && currentUser.accountStatus === "ACTIVE")
+      return router.push("/(home)");
+  }, [currentUser]);
+
   const handleStartKYC = async () => {
     setIsLoading(true);
     setError("");

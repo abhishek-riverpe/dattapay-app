@@ -30,6 +30,14 @@ export default function SubmitAccountScreen() {
   const currentUser = currentUserResponse?.data;
   const isPendingKyc = currentUser?.accountStatus === "PENDING";
 
+  React.useEffect(() => {
+    if (!currentUser) return router.push("/(account)/complete-account");
+    if (currentUser && currentUser.accountStatus === "PENDING")
+      return router.push("/(account)/complete-kyc");
+    if (currentUser && currentUser.accountStatus === "ACTIVE")
+      return router.push("/(home)");
+  }, [currentUser]);
+
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState("");
 

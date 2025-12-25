@@ -33,8 +33,10 @@ export default function CompleteAddressScreen() {
   const [keyboardHeight, setKeyboardHeight] = React.useState(0);
 
   React.useEffect(() => {
-    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
 
     const showSubscription = Keyboard.addListener(showEvent, (e) => {
       setKeyboardHeight(e.endCoordinates.height);
@@ -116,68 +118,88 @@ export default function CompleteAddressScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-          <View className="px-6 pt-6 pb-8">
-            {/* Back Button */}
-            <Pressable
-              onPress={() => router.push("/(account)/complete-account")}
-              className="flex-row items-center mb-4"
-            >
-              <ChevronLeft size={24} color={isDark ? "#fff" : "#000"} />
-              <Text className="text-base text-gray-600 dark:text-gray-300 ml-1">
-                Back
-              </Text>
-            </Pressable>
+        <View className="px-6 pt-6 pb-8">
+          {/* Back Button */}
+          <Pressable
+            onPress={() => router.push("/(account)/complete-account")}
+            className="flex-row items-center mb-4"
+          >
+            <ChevronLeft size={24} color={isDark ? "#fff" : "#000"} />
+            <Text className="text-base text-gray-600 dark:text-gray-300 ml-1">
+              Back
+            </Text>
+          </Pressable>
 
-            {/* Header */}
-            <View className="mb-6">
-              <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Permanent Address
-              </Text>
-              <Text className="text-base text-gray-600 dark:text-gray-400">
-                Please provide your residential address
+          {/* Header */}
+          <View className="mb-6">
+            <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Permanent Address
+            </Text>
+            <Text className="text-base text-gray-600 dark:text-gray-400">
+              Please provide your residential address
+            </Text>
+          </View>
+
+          {/* Server Error Message */}
+          {serverError ? (
+            <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
+              <Text className="text-red-600 dark:text-red-400 text-sm">
+                {serverError}
               </Text>
             </View>
+          ) : null}
 
-            {/* Server Error Message */}
-            {serverError ? (
-              <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
-                <Text className="text-red-600 dark:text-red-400 text-sm">
-                  {serverError}
-                </Text>
-              </View>
-            ) : null}
+          {/* Form Fields */}
+          <View className="mb-4">
+            <Controller
+              name="addressLine1"
+              control={control}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <ThemeTextInput
+                  label="Address Line 1"
+                  placeholder="Street address"
+                  value={value}
+                  onChangeText={onChange}
+                  errorMessage={error?.message}
+                />
+              )}
+            />
+          </View>
 
-            {/* Form Fields */}
-            <View className="mb-4">
+          <View className="mb-4">
+            <Controller
+              name="addressLine2"
+              control={control}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <ThemeTextInput
+                  label="Address Line 2 (Optional)"
+                  placeholder="Apt, Suite, Unit, etc."
+                  value={value || ""}
+                  onChangeText={onChange}
+                  errorMessage={error?.message}
+                />
+              )}
+            />
+          </View>
+
+          <View className="flex-row mb-4">
+            <View className="flex-1 mr-2">
               <Controller
-                name="addressLine1"
+                name="locality"
                 control={control}
                 render={({
                   field: { onChange, value },
                   fieldState: { error },
                 }) => (
                   <ThemeTextInput
-                    label="Address Line 1"
-                    placeholder="Street address"
-                    value={value}
-                    onChangeText={onChange}
-                    errorMessage={error?.message}
-                  />
-                )}
-              />
-            </View>
-
-            <View className="mb-4">
-              <Controller
-                name="addressLine2"
-                control={control}
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }) => (
-                  <ThemeTextInput
-                    label="Address Line 2 (Optional)"
-                    placeholder="Apt, Suite, Unit, etc."
+                    label="Locality"
+                    placeholder="Locality"
                     value={value || ""}
                     onChangeText={onChange}
                     errorMessage={error?.message}
@@ -185,137 +207,123 @@ export default function CompleteAddressScreen() {
                 )}
               />
             </View>
-
-            <View className="flex-row mb-4">
-              <View className="flex-1 mr-2">
-                <Controller
-                  name="locality"
-                  control={control}
-                  render={({
-                    field: { onChange, value },
-                    fieldState: { error },
-                  }) => (
-                    <ThemeTextInput
-                      label="Locality"
-                      placeholder="Locality"
-                      value={value || ""}
-                      onChangeText={onChange}
-                      errorMessage={error?.message}
-                    />
-                  )}
-                />
-              </View>
-              <View className="flex-1 ml-2">
-                <Controller
-                  name="city"
-                  control={control}
-                  render={({
-                    field: { onChange, value },
-                    fieldState: { error },
-                  }) => (
-                    <ThemeTextInput
-                      label="City"
-                      placeholder="City"
-                      value={value}
-                      onChangeText={onChange}
-                      errorMessage={error?.message}
-                    />
-                  )}
-                />
-              </View>
-            </View>
-
-            <View className="flex-row mb-4">
-              <View className="flex-1 mr-2">
-                <Controller
-                  name="state"
-                  control={control}
-                  render={({
-                    field: { onChange, value },
-                    fieldState: { error },
-                  }) => (
-                    <ThemeTextInput
-                      label="State/Province"
-                      placeholder="State"
-                      value={value}
-                      onChangeText={onChange}
-                      errorMessage={error?.message}
-                    />
-                  )}
-                />
-              </View>
-              <View className="flex-1 ml-2">
-                <Controller
-                  name="postalCode"
-                  control={control}
-                  render={({
-                    field: { onChange, value },
-                    fieldState: { error },
-                  }) => (
-                    <ThemeTextInput
-                      label="Postal Code"
-                      placeholder="Postal code"
-                      value={value}
-                      onChangeText={onChange}
-                      errorMessage={error?.message}
-                    />
-                  )}
-                />
-              </View>
-            </View>
-
-            <View className="mb-4">
+            <View className="flex-1 ml-2">
               <Controller
-                name="country"
+                name="city"
                 control={control}
                 render={({
                   field: { onChange, value },
                   fieldState: { error },
                 }) => (
-                  <CountrySelector
-                    label="Country"
+                  <ThemeTextInput
+                    label="City"
+                    placeholder="City"
                     value={value}
-                    onSelect={onChange}
+                    onChangeText={onChange}
                     errorMessage={error?.message}
                   />
                 )}
               />
             </View>
+          </View>
 
-            {/* Submit Button */}
-            <View className="mt-8 mb-6">
-              <ThemeButton
-                variant="primary"
-                onPress={handleSubmit(onSubmit)}
-                disabled={hasErrors}
-                loading={isLoading}
-              >
-                Submit & Continue to KYC
-              </ThemeButton>
-
-              {currentUser?.address && (
-                <>
-                  <ThemeButton
-                    variant="ghost"
-                    onPress={() => router.push("/(account)/submit-account")}
-                    className="mt-3"
-                  >
-                    Skip for now
-                  </ThemeButton>
-                  <Text className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
-                    You can complete this later from your account settings
-                  </Text>
-                </>
-              )}
-
-              {!currentUser?.address && (
-                <View className="mt-4">
-                  <SignOutButton />
-                </View>
-              )}
+          <View className="flex-row mb-4">
+            <View className="flex-1 mr-2">
+              <Controller
+                name="state"
+                control={control}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <ThemeTextInput
+                    label="State/Province"
+                    placeholder="State"
+                    value={value}
+                    onChangeText={onChange}
+                    errorMessage={error?.message}
+                  />
+                )}
+              />
+            </View>
+            <View className="flex-1 ml-2">
+              <Controller
+                name="postalCode"
+                control={control}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <ThemeTextInput
+                    label="Postal Code"
+                    placeholder="Postal code"
+                    value={value}
+                    onChangeText={onChange}
+                    errorMessage={error?.message}
+                  />
+                )}
+              />
             </View>
           </View>
-        </ScrollView>
+
+          <View className="mb-4">
+            <Controller
+              name="country"
+              control={control}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <CountrySelector
+                  label="Country"
+                  value={value}
+                  onSelect={onChange}
+                  errorMessage={error?.message}
+                />
+              )}
+            />
+          </View>
+
+          {/* Submit Button */}
+          <View className="mt-8 mb-6">
+            <ThemeButton
+              variant="primary"
+              onPress={handleSubmit(onSubmit)}
+              disabled={hasErrors}
+              loading={isLoading}
+            >
+              {currentUser &&
+                currentUser.accountStatus === "ACTIVE" &&
+                "Update"}
+              {currentUser &&
+                currentUser.accountStatus === "PENDING" &&
+                "Update"}
+              {!currentUser && "Submit"}
+            </ThemeButton>
+
+            {currentUser?.address && (
+              <>
+                <ThemeButton
+                  variant="ghost"
+                  onPress={() => router.push("/(account)/submit-account")}
+                  className="mt-3"
+                >
+                  Skip for now
+                </ThemeButton>
+                <Text className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+                  You can complete this later from your account settings
+                </Text>
+              </>
+            )}
+
+            {!currentUser?.address && (
+              <View className="mt-4">
+                <SignOutButton />
+              </View>
+            )}
+          </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
