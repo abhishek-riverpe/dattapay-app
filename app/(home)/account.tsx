@@ -1,13 +1,13 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useUser } from "@clerk/clerk-expo";
-import { useRouter } from "expo-router";
-import { AlertTriangle } from "lucide-react-native";
 import SignOutButton from "@/components/SignOutButton";
 import ThemeToggle from "@/components/ThemeToggle";
 import IconCircle from "@/components/ui/IconCircle";
-import useCurrentUser from "@/hooks/useCurrentUser";
 import useBiometricAuth from "@/hooks/useBiometricAuth";
+import useCurrentUser from "@/hooks/useCurrentUser";
+import { useUser } from "@clerk/clerk-expo";
+import { useRouter } from "expo-router";
+import { AlertTriangle } from "lucide-react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AccountScreen() {
   const { user } = useUser();
@@ -59,7 +59,8 @@ export default function AccountScreen() {
                 <Text className="text-lg font-semibold text-gray-900 dark:text-white">
                   {currentUser?.firstName && currentUser?.lastName
                     ? `${currentUser.firstName} ${currentUser.lastName}`
-                    : user?.firstName || user?.emailAddresses[0].emailAddress.split("@")[0]}
+                    : user?.firstName ||
+                      user?.emailAddresses[0].emailAddress.split("@")[0]}
                 </Text>
                 <Text className="text-sm text-gray-500 dark:text-gray-400">
                   {currentUser?.email || user?.emailAddresses[0].emailAddress}
@@ -222,7 +223,7 @@ export default function AccountScreen() {
         </View>
 
         {/* App Info */}
-        <View className="px-6 pt-6">
+        <View className="px-6 pt-6 mb-6">
           <Text className="text-center text-xs text-gray-400 dark:text-gray-600">
             DattaPay v1.0.0
           </Text>

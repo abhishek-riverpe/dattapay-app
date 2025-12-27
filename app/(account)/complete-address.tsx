@@ -5,6 +5,7 @@ import SignOutButton from "@/components/SignOutButton";
 import { useTheme } from "@/context/ThemeContext";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
+import { generateAndStoreKeys, hasExistingKeys } from "@/lib/key-generator";
 import { AddressFormData, addressSchema } from "@/schemas";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AxiosError } from "axios";
@@ -90,9 +91,18 @@ export default function CompleteAddressScreen() {
 
     try {
       if (currentUser?.address) {
+        // Update existing address - no key generation
         await apiClient.put("/addresses", data);
       } else {
-        await apiClient.post("/addresses", data);
+        // First time address submission - generate and store keys
+        const keysExist = await hasExistingKeys();
+        if (!keysExist) {
+          const publicKey = await generateAndStoreKeys();
+          // Include public key with address submission
+          await apiClient.post("/addresses", { ...data, publicKey });
+        } else {
+          await apiClient.post("/addresses", data);
+        }
       }
 
       if (currentUser?.accountStatus === "PENDING") {
@@ -103,6 +113,8 @@ export default function CompleteAddressScreen() {
     } catch (err: any) {
       if (err instanceof AxiosError && err.response) {
         alert(err.response.data.message);
+      } else {
+        alert(err?.message || "Something went wrong");
       }
     } finally {
       setIsLoading(false);
@@ -292,9 +304,7 @@ export default function CompleteAddressScreen() {
               disabled={hasErrors}
               loading={isLoading}
             >
-              {currentUser?.accountStatus === "ACTIVE" && "Update"}
-              {currentUser?.accountStatus === "PENDING" && "Update"}
-              {!currentUser && "Submit"}
+              {currentUser?.address ? "Update" : "Submit"}
             </ThemeButton>
 
             {currentUser?.address && (
