@@ -7,6 +7,7 @@ import SignOutButton from "@/components/SignOutButton";
 import ThemeToggle from "@/components/ThemeToggle";
 import IconCircle from "@/components/ui/IconCircle";
 import useCurrentUser from "@/hooks/useCurrentUser";
+import useBiometricAuth from "@/hooks/useBiometricAuth";
 
 export default function AccountScreen() {
   const { user } = useUser();
@@ -15,6 +16,14 @@ export default function AccountScreen() {
   const currentUser = currentUserResponse?.data;
   const isAccountActive = currentUser?.accountStatus === "ACTIVE";
   const isPendingKyc = currentUser?.accountStatus === "PENDING";
+  const { authenticate } = useBiometricAuth();
+
+  const handleUpdateProfile = async () => {
+    const result = await authenticate("Authenticate to update profile");
+    if (result.success) {
+      router.push("/(account)/complete-account");
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-[#1A1A1A]">
@@ -178,7 +187,7 @@ export default function AccountScreen() {
 
             {/* Update Profile */}
             <Pressable
-              onPress={() => router.push("/(account)/complete-account")}
+              onPress={handleUpdateProfile}
               className="flex-row items-center p-4"
             >
               <IconCircle icon="✏️" size="sm" color="gray" className="mr-3" />

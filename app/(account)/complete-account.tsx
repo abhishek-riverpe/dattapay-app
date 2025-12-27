@@ -12,13 +12,7 @@ import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
 import * as React from "react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Keyboard,
-  Platform,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { Keyboard, Platform, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CompleteAccountScreen() {
@@ -32,8 +26,10 @@ export default function CompleteAccountScreen() {
   const [keyboardHeight, setKeyboardHeight] = React.useState(0);
 
   React.useEffect(() => {
-    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
 
     const showSubscription = Keyboard.addListener(showEvent, (e) => {
       setKeyboardHeight(e.endCoordinates.height);
@@ -81,7 +77,8 @@ export default function CompleteAccountScreen() {
         firstName: currentUser.firstName,
         lastName: currentUser.lastName,
         email: currentUser.email,
-        phoneNumberPrefix: currentUser.phoneNumberPrefix?.replace("+", "") || "",
+        phoneNumberPrefix:
+          currentUser.phoneNumberPrefix?.replace("+", "") || "",
         phoneNumber: currentUser.phoneNumber,
         nationality: currentUser.nationality,
         dateOfBirth: dateOfBirth,
@@ -135,79 +132,40 @@ export default function CompleteAccountScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-          <View className="px-6 pt-6 pb-8">
-            {/* Header */}
-            <View className="mb-6">
-              <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Personal Information
-              </Text>
-              <Text className="text-base text-gray-600 dark:text-gray-400">
-                Let's start with your basic details
+        <View className="px-6 pt-6 pb-8">
+          {/* Header */}
+          <View className="mb-6">
+            <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Personal Information
+            </Text>
+            <Text className="text-base text-gray-600 dark:text-gray-400">
+              Let's start with your basic details
+            </Text>
+          </View>
+
+          {/* Server Error Message */}
+          {serverError ? (
+            <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
+              <Text className="text-red-600 dark:text-red-400 text-sm">
+                {serverError}
               </Text>
             </View>
+          ) : null}
 
-            {/* Server Error Message */}
-            {serverError ? (
-              <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
-                <Text className="text-red-600 dark:text-red-400 text-sm">
-                  {serverError}
-                </Text>
-              </View>
-            ) : null}
-
-            {/* Form Fields */}
-            {/* Row 1: First Name & Last Name */}
-            <View className="flex-row mb-4 gap-3">
-              <View className="flex-1">
-                <Controller
-                  name="firstName"
-                  control={control}
-                  render={({
-                    field: { onChange, value },
-                    fieldState: { error },
-                  }) => (
-                    <ThemeTextInput
-                      label="First Name"
-                      placeholder="First name"
-                      value={value}
-                      onChangeText={onChange}
-                      errorMessage={error?.message}
-                    />
-                  )}
-                />
-              </View>
-              <View className="flex-1">
-                <Controller
-                  name="lastName"
-                  control={control}
-                  render={({
-                    field: { onChange, value },
-                    fieldState: { error },
-                  }) => (
-                    <ThemeTextInput
-                      label="Last Name"
-                      placeholder="Last name"
-                      value={value}
-                      onChangeText={onChange}
-                      errorMessage={error?.message}
-                    />
-                  )}
-                />
-              </View>
-            </View>
-
-            <View className="mb-4">
+          {/* Form Fields */}
+          {/* Row 1: First Name & Last Name */}
+          <View className="flex-row mb-4 gap-3">
+            <View className="flex-1">
               <Controller
-                name="email"
+                name="firstName"
                 control={control}
                 render={({
                   field: { onChange, value },
                   fieldState: { error },
                 }) => (
                   <ThemeTextInput
-                    variant="email"
-                    label="Email Address"
-                    placeholder="Enter your email"
+                    label="First Name"
+                    placeholder="First name"
                     value={value}
                     onChangeText={onChange}
                     errorMessage={error?.message}
@@ -215,117 +173,156 @@ export default function CompleteAccountScreen() {
                 )}
               />
             </View>
-
-            {/* Row 2: Country Picker & Phone Number */}
-            <View className="flex-row mb-4 gap-3">
-              <View className="w-28">
-                <Controller
-                  name="phoneNumberPrefix"
-                  control={control}
-                  render={({ field: { value }, fieldState: { error } }) => (
-                    <CountryPicker
-                      label="Code"
-                      value={value}
-                      onSelect={handleCountrySelect}
-                      errorMessage={error?.message}
-                    />
-                  )}
-                />
-              </View>
-              <View className="flex-1">
-                <Controller
-                  name="phoneNumber"
-                  control={control}
-                  render={({
-                    field: { onChange, value },
-                    fieldState: { error },
-                  }) => (
-                    <ThemeTextInput
-                      label="Phone Number"
-                      placeholder="Phone number"
-                      value={value}
-                      onChangeText={onChange}
-                      errorMessage={error?.message}
-                    />
-                  )}
-                />
-              </View>
-            </View>
-
-            {/* Row 3: Nationality & Date of Birth */}
-            <View className="flex-row mb-4 gap-3">
-              <View className="flex-1">
-                <Controller
-                  name="nationality"
-                  control={control}
-                  render={({
-                    field: { onChange, value },
-                    fieldState: { error },
-                  }) => (
-                    <ThemeTextInput
-                      label="Nationality"
-                      placeholder="Nationality"
-                      value={value}
-                      onChangeText={onChange}
-                      errorMessage={error?.message}
-                    />
-                  )}
-                />
-              </View>
-              <View className="flex-1">
-                <Controller
-                  name="dateOfBirth"
-                  control={control}
-                  render={({
-                    field: { onChange, value },
-                    fieldState: { error },
-                  }) => (
-                    <ThemeTextInput
-                      label="Date of Birth"
-                      placeholder="YYYY-MM-DD"
-                      value={value}
-                      onChangeText={onChange}
-                      errorMessage={error?.message}
-                    />
-                  )}
-                />
-              </View>
-            </View>
-
-            {/* Submit Button */}
-            <View className="mt-8 mb-6">
-              <ThemeButton
-                variant="primary"
-                onPress={handleSubmit(onSubmit)}
-                disabled={hasErrors}
-                loading={isLoading}
-              >
-                Continue
-              </ThemeButton>
-
-              {currentUser && (
-                <>
-                  <ThemeButton
-                    variant="ghost"
-                    onPress={() => router.push("/(account)/complete-address")}
-                    className="mt-3"
-                  >
-                    Skip for now
-                  </ThemeButton>
-                  <Text className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
-                    You can complete this later from your account settings
-                  </Text>
-                </>
-              )}
-
-              {!currentUser && (
-                <View className="mt-4">
-                  <SignOutButton />
-                </View>
-              )}
+            <View className="flex-1">
+              <Controller
+                name="lastName"
+                control={control}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <ThemeTextInput
+                    label="Last Name"
+                    placeholder="Last name"
+                    value={value}
+                    onChangeText={onChange}
+                    errorMessage={error?.message}
+                  />
+                )}
+              />
             </View>
           </View>
-        </ScrollView>
+
+          <View className="mb-4">
+            <Controller
+              name="email"
+              control={control}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <ThemeTextInput
+                  variant="email"
+                  label="Email Address"
+                  placeholder="Enter your email"
+                  value={value}
+                  onChangeText={onChange}
+                  errorMessage={error?.message}
+                />
+              )}
+            />
+          </View>
+
+          {/* Row 2: Country Picker & Phone Number */}
+          <View className="flex-row mb-4 gap-3">
+            <View className="w-28">
+              <Controller
+                name="phoneNumberPrefix"
+                control={control}
+                render={({ field: { value }, fieldState: { error } }) => (
+                  <CountryPicker
+                    label="Code"
+                    value={value}
+                    onSelect={handleCountrySelect}
+                    errorMessage={error?.message}
+                  />
+                )}
+              />
+            </View>
+            <View className="flex-1">
+              <Controller
+                name="phoneNumber"
+                control={control}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <ThemeTextInput
+                    label="Phone Number"
+                    placeholder="Phone number"
+                    value={value}
+                    onChangeText={onChange}
+                    errorMessage={error?.message}
+                  />
+                )}
+              />
+            </View>
+          </View>
+
+          {/* Row 3: Nationality & Date of Birth */}
+          <View className="flex-row mb-4 gap-3">
+            <View className="flex-1">
+              <Controller
+                name="nationality"
+                control={control}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <ThemeTextInput
+                    label="Nationality"
+                    placeholder="Nationality"
+                    value={value}
+                    onChangeText={onChange}
+                    errorMessage={error?.message}
+                  />
+                )}
+              />
+            </View>
+            <View className="flex-1">
+              <Controller
+                name="dateOfBirth"
+                control={control}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <ThemeTextInput
+                    label="Date of Birth"
+                    placeholder="YYYY-MM-DD"
+                    value={value}
+                    onChangeText={onChange}
+                    errorMessage={error?.message}
+                  />
+                )}
+              />
+            </View>
+          </View>
+
+          {/* Submit Button */}
+          <View className="mt-8 mb-6">
+            <ThemeButton
+              variant="primary"
+              onPress={handleSubmit(onSubmit)}
+              disabled={hasErrors}
+              loading={isLoading}
+            >
+              Continue
+            </ThemeButton>
+
+            {currentUser && (
+              <>
+                <ThemeButton
+                  variant="ghost"
+                  onPress={() => router.push("/(account)/complete-address")}
+                  className="mt-3"
+                >
+                  Skip for now
+                </ThemeButton>
+                <Text className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+                  You can complete this later from your account settings
+                </Text>
+              </>
+            )}
+
+            {!currentUser && (
+              <View className="mt-4">
+                <SignOutButton />
+              </View>
+            )}
+          </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
