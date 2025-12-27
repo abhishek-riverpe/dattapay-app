@@ -1,11 +1,10 @@
+import SignOutButton from "@/components/SignOutButton";
+import CountrySelector from "@/components/ui/CountrySelector";
 import ThemeButton from "@/components/ui/ThemeButton";
 import ThemeTextInput from "@/components/ui/ThemeTextInput";
-import CountrySelector from "@/components/ui/CountrySelector";
-import SignOutButton from "@/components/SignOutButton";
 import { useTheme } from "@/context/ThemeContext";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
-import { generateAndStoreKeys, hasExistingKeys } from "@/lib/key-generator";
 import { AddressFormData, addressSchema } from "@/schemas";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AxiosError } from "axios";
@@ -94,17 +93,8 @@ export default function CompleteAddressScreen() {
         // Update existing address - no key generation
         await apiClient.put("/addresses", data);
       } else {
-        // First time address submission - generate and store keys
-        const keysExist = await hasExistingKeys();
-        if (!keysExist) {
-          const publicKey = await generateAndStoreKeys();
-          // Include public key with address submission
-          await apiClient.post("/addresses", { ...data, publicKey });
-        } else {
-          await apiClient.post("/addresses", data);
-        }
+        await apiClient.post("/addresses", data);
       }
-
       if (currentUser?.accountStatus === "PENDING") {
         router.replace("/(account)/complete-kyc");
       } else {

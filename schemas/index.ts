@@ -139,6 +139,7 @@ export type User = {
   zynkFundingAccountId: string;
   lastName: string;
   email: string;
+  publicKey: string;
   phoneNumberPrefix: string;
   phoneNumber: string;
   accountStatus: string;

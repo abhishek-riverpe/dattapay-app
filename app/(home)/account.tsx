@@ -1,13 +1,13 @@
-import SignOutButton from "@/components/SignOutButton";
-import ThemeToggle from "@/components/ThemeToggle";
-import IconCircle from "@/components/ui/IconCircle";
-import useBiometricAuth from "@/hooks/useBiometricAuth";
-import useCurrentUser from "@/hooks/useCurrentUser";
+import { View, Text, Pressable, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useUser } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
 import { AlertTriangle } from "lucide-react-native";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import SignOutButton from "@/components/SignOutButton";
+import ThemeToggle from "@/components/ThemeToggle";
+import IconCircle from "@/components/ui/IconCircle";
+import useCurrentUser from "@/hooks/useCurrentUser";
+import useBiometricAuth from "@/hooks/useBiometricAuth";
 
 export default function AccountScreen() {
   const { user } = useUser();
@@ -223,7 +223,7 @@ export default function AccountScreen() {
         </View>
 
         {/* App Info */}
-        <View className="px-6 pt-6 mb-6">
+        <View className="px-6 pt-6">
           <Text className="text-center text-xs text-gray-400 dark:text-gray-600">
             DattaPay v1.0.0
           </Text>
