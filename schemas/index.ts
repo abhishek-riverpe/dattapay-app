@@ -12,6 +12,10 @@ export const signUpSchema = yup.object({
     .string()
     .required("Password is required")
     .min(8, "Password must be at least 8 characters"),
+  confirmPassword: yup
+    .string()
+    .required("Please confirm your password")
+    .oneOf([yup.ref("password")], "Passwords must match"),
 });
 
 export type SignUpFormData = yup.InferType<typeof signUpSchema>;
