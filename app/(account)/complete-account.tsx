@@ -1,6 +1,8 @@
 import ThemeButton from "@/components/ui/ThemeButton";
 import ThemeTextInput from "@/components/ui/ThemeTextInput";
 import CountryPicker from "@/components/ui/CountryPicker";
+import DatePicker from "@/components/ui/DatePicker";
+import { Mail, Globe } from "lucide-react-native";
 import SignOutButton from "@/components/SignOutButton";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
@@ -111,7 +113,9 @@ export default function CompleteAccountScreen() {
       router.push("/(account)/complete-address");
     } catch (err) {
       if (err instanceof AxiosError && err.response) {
-        alert(err.response.data.message);
+        setServerError(err.response.data.message || "Something went wrong");
+      } else {
+        setServerError("Something went wrong");
       }
     } finally {
       setIsLoading(false);
@@ -208,6 +212,8 @@ export default function CompleteAccountScreen() {
                   value={value}
                   onChangeText={onChange}
                   errorMessage={error?.message}
+                  leftIcon={Mail}
+                  disabled
                 />
               )}
             />
@@ -261,10 +267,12 @@ export default function CompleteAccountScreen() {
                 }) => (
                   <ThemeTextInput
                     label="Nationality"
-                    placeholder="Nationality"
+                    placeholder="Select"
                     value={value}
                     onChangeText={onChange}
                     errorMessage={error?.message}
+                    leftIcon={Globe}
+                    disabled
                   />
                 )}
               />
@@ -277,12 +285,13 @@ export default function CompleteAccountScreen() {
                   field: { onChange, value },
                   fieldState: { error },
                 }) => (
-                  <ThemeTextInput
+                  <DatePicker
                     label="Date of Birth"
-                    placeholder="YYYY-MM-DD"
+                    placeholder="mm/dd/yyyy"
                     value={value}
-                    onChangeText={onChange}
+                    onChange={onChange}
                     errorMessage={error?.message}
+                    maximumDate={new Date()}
                   />
                 )}
               />

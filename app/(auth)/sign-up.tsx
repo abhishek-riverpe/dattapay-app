@@ -202,10 +202,10 @@ export default function SignUpScreen() {
           <View className="flex-1 px-6 pt-12">
             <View className="mb-8">
               <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Create account
+                Create your account
               </Text>
               <Text className="text-base text-gray-600 dark:text-gray-400">
-                Sign up to get started with DattaPay
+                Get paid in USD and auto-convert to USDC.
               </Text>
             </View>
 
@@ -314,11 +314,6 @@ export default function SignUpScreen() {
                 </ThemeButton>
               </Link>
             </View>
-
-            <Text className="text-xs text-gray-500 dark:text-gray-400 text-center mt-8 px-4">
-              By creating an account, you agree to our Terms of Service and
-              Privacy Policy
-            </Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

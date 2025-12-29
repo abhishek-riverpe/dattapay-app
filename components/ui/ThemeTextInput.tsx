@@ -1,7 +1,8 @@
 import { TextInput, View, Text, Pressable } from "react-native";
 import { useTheme } from "@/context/ThemeContext";
-import { Eye, EyeOff } from "lucide-react-native";
+import { Eye, EyeOff, Mail } from "lucide-react-native";
 import { useState } from "react";
+import type { LucideIcon } from "lucide-react-native";
 
 type InputVariant = "default" | "email" | "password" | "code";
 
@@ -16,6 +17,7 @@ interface ThemeTextInputProps {
   error?: boolean;
   errorMessage?: string;
   className?: string;
+  leftIcon?: LucideIcon;
 }
 
 const variantConfig: Record<
@@ -71,11 +73,13 @@ export default function ThemeTextInput({
   error = false,
   errorMessage,
   className = "",
+  leftIcon: LeftIcon,
 }: ThemeTextInputProps) {
   const { isDark } = useTheme();
   const config = variantConfig[variant];
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = variant === "password";
+  const hasLeftIcon = !!LeftIcon;
 
   const placeholderColor = isDark ? "#6B7280" : "#9CA3AF";
 
@@ -110,6 +114,11 @@ export default function ThemeTextInput({
         </Text>
       )}
       <View className="relative">
+        {hasLeftIcon && (
+          <View className="absolute left-4 top-0 bottom-0 justify-center z-10">
+            <LeftIcon size={20} color={isDark ? "#9CA3AF" : "#6B7280"} />
+          </View>
+        )}
         <TextInput
           value={value}
           placeholder={placeholder}
@@ -121,7 +130,7 @@ export default function ThemeTextInput({
           secureTextEntry={isPasswordField ? !showPassword : config.secureTextEntry}
           maxLength={maxLength ?? (variant === "code" ? 6 : undefined)}
           editable={!disabled}
-          className={`${inputClasses} ${isPasswordField ? "pr-12" : ""}`}
+          className={`${inputClasses} ${hasLeftIcon ? "pl-12" : ""} ${isPasswordField ? "pr-12" : ""}`}
           accessibilityLabel={label}
         />
         {isPasswordField && (
