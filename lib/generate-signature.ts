@@ -15,7 +15,7 @@ const sha256 = async (input: string): Promise<string> => {
 // Base64URL encoding
 const toBase64Url = (str: string): string => {
   const b64 = btoa(str);
-  return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return b64.replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
 };
 
 interface SignInput {
