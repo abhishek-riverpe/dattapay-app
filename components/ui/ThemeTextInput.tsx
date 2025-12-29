@@ -1,5 +1,7 @@
-import { TextInput, View, Text } from "react-native";
+import { TextInput, View, Text, Pressable } from "react-native";
 import { useTheme } from "@/context/ThemeContext";
+import { Eye, EyeOff } from "lucide-react-native";
+import { useState } from "react";
 
 type InputVariant = "default" | "email" | "password" | "code";
 
@@ -72,6 +74,8 @@ export default function ThemeTextInput({
 }: ThemeTextInputProps) {
   const { isDark } = useTheme();
   const config = variantConfig[variant];
+  const [showPassword, setShowPassword] = useState(false);
+  const isPasswordField = variant === "password";
 
   const placeholderColor = isDark ? "#6B7280" : "#9CA3AF";
 
@@ -105,20 +109,35 @@ export default function ThemeTextInput({
           {label}
         </Text>
       )}
-      <TextInput
-        value={value}
-        placeholder={placeholder}
-        placeholderTextColor={placeholderColor}
-        onChangeText={onChangeText}
-        keyboardType={config.keyboardType}
-        autoCapitalize={config.autoCapitalize}
-        autoComplete={config.autoComplete}
-        secureTextEntry={config.secureTextEntry}
-        maxLength={maxLength ?? (variant === "code" ? 6 : undefined)}
-        editable={!disabled}
-        className={inputClasses}
-        accessibilityLabel={label}
-      />
+      <View className="relative">
+        <TextInput
+          value={value}
+          placeholder={placeholder}
+          placeholderTextColor={placeholderColor}
+          onChangeText={onChangeText}
+          keyboardType={config.keyboardType}
+          autoCapitalize={config.autoCapitalize}
+          autoComplete={config.autoComplete}
+          secureTextEntry={isPasswordField ? !showPassword : config.secureTextEntry}
+          maxLength={maxLength ?? (variant === "code" ? 6 : undefined)}
+          editable={!disabled}
+          className={`${inputClasses} ${isPasswordField ? "pr-12" : ""}`}
+          accessibilityLabel={label}
+        />
+        {isPasswordField && (
+          <Pressable
+            onPress={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-0 bottom-0 justify-center"
+            accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? (
+              <EyeOff size={20} color={isDark ? "#9CA3AF" : "#6B7280"} />
+            ) : (
+              <Eye size={20} color={isDark ? "#9CA3AF" : "#6B7280"} />
+            )}
+          </Pressable>
+        )}
+      </View>
       {errorMessage && (
         <Text className="text-xs text-red-500 dark:text-red-400 mt-1">
           {errorMessage}
