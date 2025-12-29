@@ -42,6 +42,7 @@ export default function SignUpScreen() {
     defaultValues: {
       emailAddress: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
@@ -247,7 +248,7 @@ export default function SignUpScreen() {
               />
             </View>
 
-            <View className="mb-6">
+            <View className="mb-4">
               <Controller
                 name="password"
                 control={signUpControl}
@@ -270,6 +271,26 @@ export default function SignUpScreen() {
                       </Text>
                     )}
                   </>
+                )}
+              />
+            </View>
+
+            <View className="mb-6">
+              <Controller
+                name="confirmPassword"
+                control={signUpControl}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <ThemeTextInput
+                    variant="password"
+                    label="Confirm Password"
+                    placeholder="Confirm your password"
+                    value={value}
+                    onChangeText={onChange}
+                    errorMessage={error?.message}
+                  />
                 )}
               />
             </View>
