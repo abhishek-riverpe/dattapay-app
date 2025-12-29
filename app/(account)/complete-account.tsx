@@ -6,6 +6,7 @@ import { Mail, Globe } from "lucide-react-native";
 import SignOutButton from "@/components/SignOutButton";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
+import { generateAndStoreKeys, hasExistingKeys, getPublicKey } from "@/lib/key-generator";
 import { PersonalInfoFormData, personalInfoSchema } from "@/schemas";
 import { Country } from "@/constants/countries";
 import { useUser } from "@clerk/clerk-expo";
@@ -105,13 +106,35 @@ export default function CompleteAccountScreen() {
 
     try {
       if (currentUser) {
+        // Update existing user
         const { clerkUserId, ...updateData } = data;
-        await apiClient.put("/users/update-user", updateData);
+
+        // If user doesn't have publicKey, generate and include it
+        if (!currentUser.publicKey) {
+          const keysExist = await hasExistingKeys();
+          let publicKey: string;
+          if (!keysExist) {
+            publicKey = await generateAndStoreKeys();
+          } else {
+            publicKey = (await getPublicKey())!;
+          }
+          await apiClient.put("/users/update-user", { ...updateData, publicKey });
+        } else {
+          await apiClient.put("/users/update-user", updateData);
+        }
       } else {
-        await apiClient.post("/users", data);
+        // First time account creation - always generate and send keys
+        const keysExist = await hasExistingKeys();
+        let publicKey: string;
+        if (!keysExist) {
+          publicKey = await generateAndStoreKeys();
+        } else {
+          publicKey = (await getPublicKey())!;
+        }
+        await apiClient.post("/users", { ...data, publicKey });
       }
       router.push("/(account)/complete-address");
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof AxiosError && err.response) {
         setServerError(err.response.data.message || "Something went wrong");
       } else {

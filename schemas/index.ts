@@ -48,6 +48,37 @@ export type VerificationCodeFormData = yup.InferType<
 >;
 
 // =====================================
+// Forgot Password Schemas
+// =====================================
+export const forgotPasswordEmailSchema = yup.object({
+  emailAddress: yup
+    .string()
+    .required("Email is required")
+    .email("Please enter a valid email address"),
+});
+
+export type ForgotPasswordEmailFormData = yup.InferType<
+  typeof forgotPasswordEmailSchema
+>;
+
+export const resetPasswordSchema = yup.object({
+  code: yup
+    .string()
+    .required("Reset code is required")
+    .length(6, "Code must be 6 digits"),
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(8, "Password must be at least 8 characters"),
+  confirmPassword: yup
+    .string()
+    .required("Please confirm your password")
+    .oneOf([yup.ref("password")], "Passwords must match"),
+});
+
+export type ResetPasswordFormData = yup.InferType<typeof resetPasswordSchema>;
+
+// =====================================
 // Personal Info Schema (Screen 1)
 // =====================================
 export const personalInfoSchema = yup.object({
@@ -143,6 +174,7 @@ export type User = {
   zynkFundingAccountId: string;
   lastName: string;
   email: string;
+  publicKey: string;
   phoneNumberPrefix: string;
   phoneNumber: string;
   accountStatus: string;
@@ -151,4 +183,58 @@ export type User = {
   address: Address;
   created_at: Date;
   updated_at: Date;
+};
+
+// =====================================
+// Wallet Types
+// =====================================
+export type WalletAccount = {
+  id: number;
+  walletId: number;
+  address: string;
+  curve: string;
+  pathFormat: string;
+  path: string;
+  addressFormat: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Wallet = {
+  id: number;
+  userId: number;
+  zynkWalletId: string;
+  walletName: string;
+  chain: string;
+  status: string;
+  account: WalletAccount | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type PreparePayload = {
+  payloadId: string;
+  payloadToSign: string;
+};
+
+export type Transaction = {
+  hash: string;
+  type: string;
+  status: string;
+  timestamp: string;
+  from: string;
+  to: string;
+  amount: string;
+  tokenSymbol: string;
+  fee: string;
+};
+
+export type WalletTransactions = {
+  wallet: {
+    id: number;
+    walletName: string;
+    address: string;
+  };
+  transactions: Transaction[];
+  total: number;
 };
