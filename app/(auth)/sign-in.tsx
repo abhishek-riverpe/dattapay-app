@@ -235,7 +235,7 @@ export default function SignInScreen() {
                 Welcome back
               </Text>
               <Text className="text-base text-gray-600 dark:text-gray-400">
-                Sign in to your DattaPay account
+                Sign in to your DattaPay account to continue.
               </Text>
             </View>
 
@@ -278,7 +278,7 @@ export default function SignInScreen() {
               />
             </View>
 
-            <View className="mb-6">
+            <View className="mb-2">
               <Controller
                 name="password"
                 control={signInControl}
@@ -296,6 +296,14 @@ export default function SignInScreen() {
                   />
                 )}
               />
+            </View>
+
+            <View className="flex-row justify-end mb-6">
+              <Link href="/forgot-password" asChild>
+                <ThemeButton variant="link" onPress={() => {}}>
+                  Forgot password?
+                </ThemeButton>
+              </Link>
             </View>
 
             <ThemeButton

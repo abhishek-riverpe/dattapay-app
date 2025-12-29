@@ -44,6 +44,37 @@ export type VerificationCodeFormData = yup.InferType<
 >;
 
 // =====================================
+// Forgot Password Schemas
+// =====================================
+export const forgotPasswordEmailSchema = yup.object({
+  emailAddress: yup
+    .string()
+    .required("Email is required")
+    .email("Please enter a valid email address"),
+});
+
+export type ForgotPasswordEmailFormData = yup.InferType<
+  typeof forgotPasswordEmailSchema
+>;
+
+export const resetPasswordSchema = yup.object({
+  code: yup
+    .string()
+    .required("Reset code is required")
+    .length(6, "Code must be 6 digits"),
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(8, "Password must be at least 8 characters"),
+  confirmPassword: yup
+    .string()
+    .required("Please confirm your password")
+    .oneOf([yup.ref("password")], "Passwords must match"),
+});
+
+export type ResetPasswordFormData = yup.InferType<typeof resetPasswordSchema>;
+
+// =====================================
 // Personal Info Schema (Screen 1)
 // =====================================
 export const personalInfoSchema = yup.object({
