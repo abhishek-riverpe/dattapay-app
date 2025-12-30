@@ -1,4 +1,7 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, Image } from "react-native";
+
+// Dummy avatar for demo
+const DUMMY_AVATAR = require("@/assets/images/avatar_2.jpg");
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useUser } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
@@ -42,19 +45,7 @@ export default function AccountScreen() {
         <View className="px-6 mb-4">
           <View className="bg-white dark:bg-gray-900 rounded-2xl p-5">
             <View className="flex-row items-center">
-              <IconCircle
-                size="xl"
-                color="primary"
-                icon={
-                  <Text className="text-primary text-3xl font-bold">
-                    {(
-                      currentUser?.firstName?.[0] ||
-                      user?.firstName?.[0] ||
-                      user?.emailAddresses[0].emailAddress[0]
-                    )?.toUpperCase()}
-                  </Text>
-                }
-              />
+              <Image source={DUMMY_AVATAR} className="w-16 h-16 rounded-full" />
               <View className="ml-4 flex-1">
                 <Text className="text-lg font-semibold text-gray-900 dark:text-white">
                   {currentUser?.firstName && currentUser?.lastName

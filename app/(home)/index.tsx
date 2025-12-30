@@ -1,19 +1,21 @@
+import SignOutButton from "@/components/SignOutButton";
 import ThemeToggle from "@/components/ThemeToggle";
-import IconCircle from "@/components/ui/IconCircle";
+import ActivityDetailsModal from "@/components/activity/ActivityDetailsModal";
+import ActivityItem from "@/components/activity/ActivityItem";
+import { Activity, DUMMY_ACTIVITIES } from "@/components/activity/types";
+import BankDetailsModal from "@/components/funds/BankDetailsModal";
+import WithdrawModal from "@/components/funds/WithdrawModal";
 import QuickAction from "@/components/ui/QuickAction";
 import ThemeButton from "@/components/ui/ThemeButton";
 import useCurrentUser from "@/hooks/useCurrentUser";
-import SignOutButton from "@/components/SignOutButton";
-import BankDetailsModal from "@/components/funds/BankDetailsModal";
-import WithdrawModal from "@/components/funds/WithdrawModal";
-import { Activity, DUMMY_ACTIVITIES } from "@/components/activity/types";
-import ActivityItem from "@/components/activity/ActivityItem";
-import ActivityDetailsModal from "@/components/activity/ActivityDetailsModal";
-import { useState } from "react";
-import { Text, View, Pressable, Modal } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { AlertTriangle } from "lucide-react-native";
+import { useState } from "react";
+import { Image, Modal, Pressable, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+// Dummy avatar for demo
+const DUMMY_AVATAR = require("@/assets/images/avatar_2.jpg");
 
 // Dummy balance for demo
 const AVAILABLE_BALANCE = 500;
@@ -24,7 +26,9 @@ export default function HomeScreen() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showBankDetails, setShowBankDetails] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
+    null
+  );
   const isAccountActive = user?.data?.accountStatus === "ACTIVE";
 
   // Get first 3 activities for recent activity section
@@ -45,16 +49,9 @@ export default function HomeScreen() {
             <View className="flex-row items-center gap-3">
               <ThemeToggle variant="icon" />
               <Pressable onPress={() => setShowDropdown(true)}>
-                <IconCircle
-                  size="md"
-                  color="primary-solid"
-                  icon={
-                    <Text className="text-white text-lg font-bold">
-                      {(
-                        user?.data.firstName?.[0] || user?.data.email
-                      )?.toUpperCase()}
-                    </Text>
-                  }
+                <Image
+                  source={DUMMY_AVATAR}
+                  className="w-10 h-10 rounded-full"
                 />
               </Pressable>
             </View>
@@ -121,10 +118,7 @@ export default function HomeScreen() {
         animationType="fade"
         onRequestClose={() => setShowDropdown(false)}
       >
-        <Pressable
-          className="flex-1"
-          onPress={() => setShowDropdown(false)}
-        >
+        <Pressable className="flex-1" onPress={() => setShowDropdown(false)}>
           <View className="absolute top-20 right-6 bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-lg min-w-[220px]">
             {/* User Info */}
             <View className="border-b border-gray-100 dark:border-gray-800 pb-3 mb-3">
