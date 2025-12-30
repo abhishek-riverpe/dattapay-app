@@ -1,5 +1,4 @@
 import ThemeToggle from "@/components/ThemeToggle";
-import EmptyState from "@/components/ui/EmptyState";
 import IconCircle from "@/components/ui/IconCircle";
 import QuickAction from "@/components/ui/QuickAction";
 import ThemeButton from "@/components/ui/ThemeButton";
@@ -7,6 +6,9 @@ import useCurrentUser from "@/hooks/useCurrentUser";
 import SignOutButton from "@/components/SignOutButton";
 import BankDetailsModal from "@/components/funds/BankDetailsModal";
 import WithdrawModal from "@/components/funds/WithdrawModal";
+import { Activity, DUMMY_ACTIVITIES } from "@/components/activity/types";
+import ActivityItem from "@/components/activity/ActivityItem";
+import ActivityDetailsModal from "@/components/activity/ActivityDetailsModal";
 import { useState } from "react";
 import { Text, View, Pressable, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,7 +24,11 @@ export default function HomeScreen() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showBankDetails, setShowBankDetails] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const isAccountActive = user?.data?.accountStatus === "ACTIVE";
+
+  // Get first 3 activities for recent activity section
+  const recentActivities = DUMMY_ACTIVITIES.slice(0, 3);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-[#1A1A1A]">
@@ -89,18 +95,21 @@ export default function HomeScreen() {
               variant="ghost"
               size="sm"
               fullWidth={false}
-              onPress={() => {}}
+              onPress={() => router.push("/(home)/activity")}
             >
               See All
             </ThemeButton>
           </View>
 
-          <View className="bg-white dark:bg-gray-900 rounded-2xl p-6 items-center justify-center flex-1">
-            <EmptyState
-              icon="📋"
-              title="No transactions yet"
-              description="Your recent activity will appear here"
-            />
+          <View className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden">
+            {recentActivities.map((activity, index) => (
+              <ActivityItem
+                key={activity.id}
+                activity={activity}
+                onPress={() => setSelectedActivity(activity)}
+                isLast={index === recentActivities.length - 1}
+              />
+            ))}
           </View>
         </View>
       </View>
@@ -165,6 +174,13 @@ export default function HomeScreen() {
         visible={showWithdraw}
         onClose={() => setShowWithdraw(false)}
         availableBalance={AVAILABLE_BALANCE}
+      />
+
+      {/* Activity Details Modal */}
+      <ActivityDetailsModal
+        activity={selectedActivity}
+        visible={selectedActivity !== null}
+        onClose={() => setSelectedActivity(null)}
       />
     </SafeAreaView>
   );
