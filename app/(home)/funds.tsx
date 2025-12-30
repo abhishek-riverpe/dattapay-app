@@ -1,23 +1,26 @@
-import { View, Text, ActivityIndicator, Pressable } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import EmptyState from "@/components/ui/EmptyState";
-import ThemeButton from "@/components/ui/ThemeButton";
-import useWallet from "@/hooks/useWallet";
-import useCreateWallet from "@/hooks/useCreateWallet";
-import { useState } from "react";
-import { Copy, CheckCircle, Wallet } from "lucide-react-native";
-import * as Clipboard from "expo-clipboard";
 import BankDetailsModal from "@/components/funds/BankDetailsModal";
 import WithdrawModal from "@/components/funds/WithdrawModal";
+import EmptyState from "@/components/ui/EmptyState";
+import ThemeButton from "@/components/ui/ThemeButton";
+import useCreateWallet from "@/hooks/useCreateWallet";
+import useWallet from "@/hooks/useWallet";
+import { useState } from "react";
+import { ActivityIndicator, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // Dummy balance for demo
-const AVAILABLE_BALANCE = 500;
+const AVAILABLE_BALANCE = 700;
+
+// Dummy crypto balances
+const CRYPTO_BALANCES = [
+  { symbol: "USDT", balance: 400 },
+  { symbol: "USDC", balance: 300 },
+];
 
 export default function FundScreen() {
   const { data: walletData, isLoading: isLoadingWallet } = useWallet();
   const createWallet = useCreateWallet();
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const [showBankDetails, setShowBankDetails] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
 
@@ -30,14 +33,6 @@ export default function FundScreen() {
       await createWallet.mutateAsync();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create wallet");
-    }
-  };
-
-  const copyAddress = async () => {
-    if (wallet?.account?.address) {
-      await Clipboard.setStringAsync(wallet.account.address);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -55,9 +50,6 @@ export default function FundScreen() {
         {/* Header */}
         <View className="bg-primary px-6 pt-4 pb-8 rounded-b-3xl">
           <View className="flex-row items-center mb-2">
-            <View className="bg-white/20 p-2 rounded-xl mr-3">
-              <Wallet size={24} color="white" />
-            </View>
             <View>
               <Text className="text-white text-2xl font-bold">Funds</Text>
               <Text className="text-primary-100 text-sm">
@@ -70,7 +62,7 @@ export default function FundScreen() {
           <View className="bg-white/10 rounded-2xl p-5 mt-4">
             <Text className="text-primary-100 text-sm mb-1">Total Balance</Text>
             <View className="flex-row items-center justify-between">
-              <Text className="text-white text-4xl font-bold">$0.00</Text>
+              <Text className="text-white text-4xl font-bold">$700.00</Text>
               <ThemeButton
                 variant="secondary"
                 size="sm"
@@ -90,7 +82,7 @@ export default function FundScreen() {
               <View className="flex-1">
                 {/* Wallet Card */}
                 <View className="bg-primary rounded-2xl p-5 mb-5">
-                  <View className="flex-row items-center justify-between mb-4">
+                  <View className="flex-row items-center justify-between">
                     <View>
                       <Text className="text-primary-100 text-xs uppercase tracking-wide">
                         Wallet
@@ -100,14 +92,11 @@ export default function FundScreen() {
                       </Text>
                     </View>
                     <View className="flex-row items-center gap-2">
-                      <ThemeButton
-                        variant="secondary"
-                        size="sm"
-                        fullWidth={false}
-                        onPress={() => setShowWithdraw(true)}
-                      >
-                        Withdraw
-                      </ThemeButton>
+                      <View className="bg-white/20 px-3 py-1.5 rounded-full">
+                        <Text className="text-white text-xs font-medium">
+                          {wallet.chain}
+                        </Text>
+                      </View>
                       <View className="bg-accent-500 px-3 py-1.5 rounded-full">
                         <Text className="text-white text-xs font-medium">
                           {wallet.status}
@@ -115,66 +104,45 @@ export default function FundScreen() {
                       </View>
                     </View>
                   </View>
-                  <View className="border-t border-white/20 pt-4">
-                    <Text className="text-primary-100 text-xs uppercase tracking-wide mb-1">
-                      Network
-                    </Text>
-                    <Text className="text-white text-base font-medium">
-                      {wallet.chain}
-                    </Text>
+                </View>
+
+                {/* Crypto Balances */}
+                <View className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 mb-5">
+                  <Text className="text-gray-900 dark:text-white font-semibold text-base mb-4">
+                    Crypto Balances
+                  </Text>
+
+                  <View className="gap-3">
+                    {CRYPTO_BALANCES.map((crypto) => (
+                      <View
+                        key={crypto.symbol}
+                        className="flex-row items-center justify-between bg-white dark:bg-gray-700 p-4 rounded-xl"
+                      >
+                        <View className="flex-row items-center">
+                          <View className="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 items-center justify-center mr-3">
+                            <Text className="text-primary font-bold text-sm">
+                              {crypto.symbol.charAt(0)}
+                            </Text>
+                          </View>
+                          <Text className="text-gray-900 dark:text-white font-medium text-base">
+                            {crypto.symbol}
+                          </Text>
+                        </View>
+                        <Text className="text-gray-900 dark:text-white font-semibold text-lg">
+                          ${crypto.balance.toFixed(2)}
+                        </Text>
+                      </View>
+                    ))}
                   </View>
                 </View>
 
-                {/* Account Info */}
-                {wallet.account && (
-                  <View className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5">
-                    <Text className="text-gray-900 dark:text-white font-semibold text-base mb-4">
-                      Account Details
-                    </Text>
-
-                    <View className="mb-4">
-                      <Text className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide mb-2">
-                        Address
-                      </Text>
-                      <Pressable
-                        onPress={copyAddress}
-                        className="flex-row items-center bg-white dark:bg-gray-700 p-3 rounded-xl"
-                      >
-                        <Text
-                          className="text-gray-900 dark:text-white text-sm flex-1 font-mono"
-                          numberOfLines={1}
-                          ellipsizeMode="middle"
-                        >
-                          {wallet.account.address}
-                        </Text>
-                        {copied ? (
-                          <CheckCircle size={18} color="#10B981" />
-                        ) : (
-                          <Copy size={18} color="#6B7280" />
-                        )}
-                      </Pressable>
-                    </View>
-
-                    <View className="flex-row">
-                      <View className="flex-1 mr-3 bg-white dark:bg-gray-700 p-3 rounded-xl">
-                        <Text className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide mb-1">
-                          Curve
-                        </Text>
-                        <Text className="text-gray-900 dark:text-white text-sm font-medium">
-                          {wallet.account.curve.replace("CURVE_", "")}
-                        </Text>
-                      </View>
-                      <View className="flex-1 bg-white dark:bg-gray-700 p-3 rounded-xl">
-                        <Text className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide mb-1">
-                          Path
-                        </Text>
-                        <Text className="text-gray-900 dark:text-white text-sm font-medium">
-                          {wallet.account.path}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                )}
+                {/* Withdraw Button */}
+                <ThemeButton
+                  variant="primary"
+                  onPress={() => setShowWithdraw(true)}
+                >
+                  Withdraw
+                </ThemeButton>
               </View>
             ) : (
               <View className="flex-1 items-center justify-center">
