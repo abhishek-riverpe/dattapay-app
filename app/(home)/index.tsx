@@ -5,16 +5,23 @@ import QuickAction from "@/components/ui/QuickAction";
 import ThemeButton from "@/components/ui/ThemeButton";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import SignOutButton from "@/components/SignOutButton";
+import BankDetailsModal from "@/components/funds/BankDetailsModal";
+import WithdrawModal from "@/components/funds/WithdrawModal";
 import { useState } from "react";
 import { Text, View, Pressable, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { AlertTriangle } from "lucide-react-native";
 
+// Dummy balance for demo
+const AVAILABLE_BALANCE = 500;
+
 export default function HomeScreen() {
   const { data: user } = useCurrentUser();
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showBankDetails, setShowBankDetails] = useState(false);
+  const [showWithdraw, setShowWithdraw] = useState(false);
   const isAccountActive = user?.data?.accountStatus === "ACTIVE";
 
   return (
@@ -58,28 +65,16 @@ export default function HomeScreen() {
         <View className="px-6 -mt-4">
           <View className="bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-sm flex-row justify-around">
             <QuickAction
-              icon="↑"
-              label="Send"
+              icon="$"
+              label="Get Paid"
               color="primary"
-              onPress={() => {}}
+              onPress={() => setShowBankDetails(true)}
             />
             <QuickAction
-              icon="↓"
-              label="Receive"
-              color="blue"
-              onPress={() => {}}
-            />
-            <QuickAction
-              icon="+"
-              label="Top Up"
-              color="purple"
-              onPress={() => {}}
-            />
-            <QuickAction
-              icon="⋯"
-              label="More"
+              icon="↑"
+              label="Withdraw"
               color="orange"
-              onPress={() => {}}
+              onPress={() => setShowWithdraw(true)}
             />
           </View>
         </View>
@@ -158,6 +153,19 @@ export default function HomeScreen() {
           </View>
         </Pressable>
       </Modal>
+
+      {/* Bank Details Modal */}
+      <BankDetailsModal
+        visible={showBankDetails}
+        onClose={() => setShowBankDetails(false)}
+      />
+
+      {/* Withdraw Modal */}
+      <WithdrawModal
+        visible={showWithdraw}
+        onClose={() => setShowWithdraw(false)}
+        availableBalance={AVAILABLE_BALANCE}
+      />
     </SafeAreaView>
   );
 }
