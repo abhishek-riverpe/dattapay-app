@@ -1,13 +1,12 @@
-import { View, Text, ActivityIndicator } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import EmptyState from "@/components/ui/EmptyState";
-import ThemeButton from "@/components/ui/ThemeButton";
-import useWallet from "@/hooks/useWallet";
-import useCreateWallet from "@/hooks/useCreateWallet";
-import { useState } from "react";
-import { Wallet } from "lucide-react-native";
 import BankDetailsModal from "@/components/funds/BankDetailsModal";
 import WithdrawModal from "@/components/funds/WithdrawModal";
+import EmptyState from "@/components/ui/EmptyState";
+import ThemeButton from "@/components/ui/ThemeButton";
+import useCreateWallet from "@/hooks/useCreateWallet";
+import useWallet from "@/hooks/useWallet";
+import { useState } from "react";
+import { ActivityIndicator, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // Dummy balance for demo
 const AVAILABLE_BALANCE = 700;
@@ -51,9 +50,6 @@ export default function FundScreen() {
         {/* Header */}
         <View className="bg-primary px-6 pt-4 pb-8 rounded-b-3xl">
           <View className="flex-row items-center mb-2">
-            <View className="bg-white/20 p-2 rounded-xl mr-3">
-              <Wallet size={24} color="white" />
-            </View>
             <View>
               <Text className="text-white text-2xl font-bold">Funds</Text>
               <Text className="text-primary-100 text-sm">
