@@ -6,7 +6,11 @@ import { Mail, Globe } from "lucide-react-native";
 import SignOutButton from "@/components/SignOutButton";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
-import { generateAndStoreKeys, hasExistingKeys, getPublicKey } from "@/lib/key-generator";
+import {
+  generateAndStoreKeys,
+  hasExistingKeys,
+  getPublicKey,
+} from "@/lib/key-generator";
 import { PersonalInfoFormData, personalInfoSchema } from "@/schemas";
 import { Country } from "@/constants/countries";
 import { useUser } from "@clerk/clerk-expo";
@@ -118,7 +122,10 @@ export default function CompleteAccountScreen() {
           } else {
             publicKey = (await getPublicKey())!;
           }
-          await apiClient.put("/users/update-user", { ...updateData, publicKey });
+          await apiClient.put("/users/update-user", {
+            ...updateData,
+            publicKey,
+          });
         } else {
           await apiClient.put("/users/update-user", updateData);
         }
@@ -279,7 +286,7 @@ export default function CompleteAccountScreen() {
           </View>
 
           {/* Row 3: Nationality & Date of Birth */}
-          <View className="flex-row mb-4 gap-3">
+          <View className="mb-4 gap-4">
             <View className="flex-1">
               <Controller
                 name="nationality"
