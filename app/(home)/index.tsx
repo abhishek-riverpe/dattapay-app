@@ -1,5 +1,4 @@
 import SignOutButton from "@/components/SignOutButton";
-import ThemeToggle from "@/components/ThemeToggle";
 import ActivityDetailsModal from "@/components/activity/ActivityDetailsModal";
 import ActivityItem from "@/components/activity/ActivityItem";
 import { Activity, DUMMY_ACTIVITIES } from "@/components/activity/types";
@@ -46,15 +45,12 @@ export default function HomeScreen() {
                 {user?.data.firstName || user?.data.email}
               </Text>
             </View>
-            <View className="flex-row items-center gap-3">
-              <ThemeToggle variant="icon" />
-              <Pressable onPress={() => setShowDropdown(true)}>
-                <Image
-                  source={DUMMY_AVATAR}
-                  className="w-10 h-10 rounded-full"
-                />
-              </Pressable>
-            </View>
+            <Pressable onPress={() => setShowDropdown(true)}>
+              <Image
+                source={DUMMY_AVATAR}
+                className="w-10 h-10 rounded-full"
+              />
+            </Pressable>
           </View>
 
           {/* Balance Card */}
@@ -68,7 +64,7 @@ export default function HomeScreen() {
         <View className="px-6 -mt-4">
           <View className="bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-sm flex-row justify-around">
             <QuickAction
-              icon="$"
+              icon="↓"
               label="Get Paid"
               color="primary"
               onPress={() => setShowBankDetails(true)}
