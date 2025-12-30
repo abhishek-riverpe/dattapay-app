@@ -48,17 +48,21 @@ export default function HomeLayout() {
           }}
         />
         <Tabs.Screen
-          name="activity"
+          name="funds"
           options={{
-            title: "Activity",
-            tabBarIcon: ({ color, size }) => <Clock size={size} color={color} />,
+            title: "Funds",
+            tabBarIcon: ({ color, size }) => (
+              <Wallet size={size} color={color} />
+            ),
           }}
         />
         <Tabs.Screen
-          name="wallet"
+          name="activity"
           options={{
-            title: "Wallet",
-            tabBarIcon: ({ color, size }) => <Wallet size={size} color={color} />,
+            title: "Activity",
+            tabBarIcon: ({ color, size }) => (
+              <Clock size={size} color={color} />
+            ),
           }}
         />
         <Tabs.Screen
