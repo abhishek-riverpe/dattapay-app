@@ -5,7 +5,7 @@ import ThemeButton from "@/components/ui/ThemeButton";
 import useCreateWallet from "@/hooks/useCreateWallet";
 import useWallet from "@/hooks/useWallet";
 import { useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Image, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // Dummy balance for demo
@@ -13,8 +13,8 @@ const AVAILABLE_BALANCE = 700;
 
 // Dummy crypto balances
 const CRYPTO_BALANCES = [
-  { symbol: "USDT", balance: 400 },
-  { symbol: "USDC", balance: 300 },
+  { symbol: "USDT", balance: 400, icon: require("@/assets/images/usdt.png") },
+  { symbol: "USDC", balance: 300, icon: require("@/assets/images/usdc.png") },
 ];
 
 export default function FundScreen() {
@@ -119,11 +119,10 @@ export default function FundScreen() {
                         className="flex-row items-center justify-between bg-white dark:bg-gray-700 p-4 rounded-xl"
                       >
                         <View className="flex-row items-center">
-                          <View className="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 items-center justify-center mr-3">
-                            <Text className="text-primary font-bold text-sm">
-                              {crypto.symbol.charAt(0)}
-                            </Text>
-                          </View>
+                          <Image
+                            source={crypto.icon}
+                            className="w-8 h-8 mr-3"
+                          />
                           <Text className="text-gray-900 dark:text-white font-medium text-base">
                             {crypto.symbol}
                           </Text>
