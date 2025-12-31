@@ -142,7 +142,7 @@ export const addressSchema = yup.object({
   state: yup.string().required("State/Province is required"),
   country: yup.string().required("Country is required"),
   postalCode: yup.string().required("Postal code is required"),
-  userId: yup.number().required(),
+  userId: yup.string().uuid().required(),
 });
 
 export type AddressFormData = yup.InferType<typeof addressSchema>;
@@ -154,7 +154,7 @@ export type APIResponse<T> = {
 };
 
 export type Address = {
-  id: number;
+  id: string;
   addressLine1: string;
   addressLine2: string;
   locality: string;
@@ -167,7 +167,7 @@ export type Address = {
 };
 
 export type User = {
-  id: number;
+  id: string;
   firstName: string;
   clerkUserId: string;
   zynkEntityId: string;
@@ -189,7 +189,7 @@ export type User = {
 // Wallet Types
 // =====================================
 export type WalletAccount = {
-  id: number;
+  id: string;
   walletId: number;
   address: string;
   curve: string;
@@ -201,8 +201,8 @@ export type WalletAccount = {
 };
 
 export type Wallet = {
-  id: number;
-  userId: number;
+  id: string;
+  userId: string;
   zynkWalletId: string;
   walletName: string;
   chain: string;
@@ -231,7 +231,7 @@ export type Transaction = {
 
 export type WalletTransactions = {
   wallet: {
-    id: number;
+    id: string;
     walletName: string;
     address: string;
   };
