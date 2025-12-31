@@ -5,7 +5,14 @@ import ThemeButton from "@/components/ui/ThemeButton";
 import useCreateWallet from "@/hooks/useCreateWallet";
 import useWallet from "@/hooks/useWallet";
 import { useState } from "react";
-import { ActivityIndicator, Image, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import * as Clipboard from "expo-clipboard";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // Dummy balance for demo
@@ -104,6 +111,28 @@ export default function FundScreen() {
                       </View>
                     </View>
                   </View>
+
+                  {/* Wallet Address */}
+                  {wallet.account?.address && (
+                    <TouchableOpacity
+                      className="mt-4 bg-white/10 rounded-xl p-3"
+                      onPress={() =>
+                        Clipboard.setStringAsync(wallet.account!.address)
+                      }
+                      activeOpacity={0.7}
+                    >
+                      <Text className="text-primary-100 text-xs mb-1">
+                        Wallet Address (tap to copy)
+                      </Text>
+                      <Text
+                        className="text-white text-sm font-mono"
+                        numberOfLines={1}
+                        ellipsizeMode="middle"
+                      >
+                        {wallet.account.address}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
 
                 {/* Crypto Balances */}
