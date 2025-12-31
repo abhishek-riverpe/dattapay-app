@@ -9,6 +9,7 @@ import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "nativewind";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 import "./global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -50,6 +51,7 @@ export default function RootLayout() {
             <ThemeWrapper>
               <QueryClientProvider client={queryClient}>
                 <Slot />
+                <Toast />
               </QueryClientProvider>
             </ThemeWrapper>
           </SafeAreaProvider>
