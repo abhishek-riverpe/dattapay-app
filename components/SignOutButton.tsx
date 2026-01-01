@@ -4,6 +4,7 @@ import { Text } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import ThemeButton from "@/components/ui/ThemeButton";
 import { useKycStore } from "@/store";
+import { clearAdminToken } from "@/lib/token-generator";
 
 export default function SignOutButton() {
   const { signOut } = useClerk();
@@ -14,6 +15,7 @@ export default function SignOutButton() {
   const handleSignOut = async () => {
     try {
       await signOut();
+      clearAdminToken();
       queryClient.clear();
       clearKycData();
       router.replace("/(auth)/sign-in");

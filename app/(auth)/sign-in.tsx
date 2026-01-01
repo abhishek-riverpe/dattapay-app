@@ -16,6 +16,7 @@ import AppleSignInButton from "@/components/AppleSignInButton";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import ThemeButton from "@/components/ui/ThemeButton";
 import ThemeTextInput from "@/components/ui/ThemeTextInput";
+import { refreshAdminToken } from "@/lib/token-generator";
 import {
   signInSchema,
   verificationCodeSchema,
@@ -72,6 +73,7 @@ export default function SignInScreen() {
         });
 
         if (signInAttempt.status === "complete") {
+          await refreshAdminToken();
           await setActive({
             session: signInAttempt.createdSessionId,
             navigate: async ({ session }) => {
@@ -124,6 +126,7 @@ export default function SignInScreen() {
         });
 
         if (signInAttempt.status === "complete") {
+          await refreshAdminToken();
           await setActive({
             session: signInAttempt.createdSessionId,
             navigate: async ({ session }) => {
