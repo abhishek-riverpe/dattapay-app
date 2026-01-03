@@ -1,4 +1,5 @@
 // Account Service - Handles account completion API calls
+import apiClient from "@/lib/api-client";
 
 export interface AccountFormData {
   clerkUserId: string;
@@ -20,26 +21,15 @@ export interface AccountFormData {
   };
 }
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "https://api.dattapay.com";
-
 export async function submitAccountDetails(data: AccountFormData): Promise<void> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/users/complete-account`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    const response = await apiClient.post("/api/users/complete-account", data);
+    return response.data;
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "response" in error) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      throw new Error(axiosError.response?.data?.message || "Failed to submit account details");
     }
-
-    return await response.json();
-  } catch (error: any) {
-    console.error("Submit account details error:", error);
     throw error;
   }
 }
@@ -49,25 +39,10 @@ export async function checkAccountStatus(clerkUserId: string): Promise<{
   kycCompleted: boolean;
 }> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/users/${clerkUserId}/status`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      // If user doesn't exist or error, assume account not completed
-      return {
-        accountCompleted: false,
-        kycCompleted: false,
-      };
-    }
-
-    return await response.json();
-  } catch (error: any) {
-    console.error("Check account status error:", error);
-    // Default to not completed on error
+    const response = await apiClient.get(`/api/users/${clerkUserId}/status`);
+    return response.data;
+  } catch (error: unknown) {
+    // If user doesn't exist or error, assume account not completed
     return {
       accountCompleted: false,
       kycCompleted: false,
@@ -82,22 +57,13 @@ export async function submitKYCDocuments(data: {
   proofOfAddress?: string;
 }): Promise<void> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/users/kyc`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    const response = await apiClient.post("/api/users/kyc", data);
+    return response.data;
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "response" in error) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      throw new Error(axiosError.response?.data?.message || "Failed to submit KYC documents");
     }
-
-    return await response.json();
-  } catch (error: any) {
-    console.error("Submit KYC documents error:", error);
     throw error;
   }
 }

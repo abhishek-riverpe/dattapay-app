@@ -5,9 +5,9 @@ import ThemeTextInput from "@/components/ui/ThemeTextInput";
 import { useTheme } from "@/context/ThemeContext";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
+import { getUserFriendlyErrorMessage, logError } from "@/lib/error-handler";
 import { AddressFormData, addressSchema } from "@/schemas";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import * as React from "react";
@@ -100,12 +100,10 @@ export default function CompleteAddressScreen() {
       } else {
         router.replace("/(account)/submit-account");
       }
-    } catch (err: any) {
-      if (err instanceof AxiosError && err.response) {
-        alert(err.response.data.message);
-      } else {
-        alert(err?.message || "Something went wrong");
-      }
+    } catch (err: unknown) {
+      logError("complete-address", err);
+      const userMessage = getUserFriendlyErrorMessage(err);
+      setServerError(userMessage);
     } finally {
       setIsLoading(false);
     }

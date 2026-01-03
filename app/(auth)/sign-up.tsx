@@ -77,7 +77,6 @@ export default function SignUpScreen() {
       setServerError(
         err.errors?.[0]?.message || "An error occurred during sign up"
       );
-      console.error(JSON.stringify(err, null, 2));
     } finally {
       setIsLoading(false);
     }
@@ -107,11 +106,10 @@ export default function SignUpScreen() {
         });
         router.replace("/(account)");
       } else {
-        console.error(JSON.stringify(signUpAttempt, null, 2));
+        // Sign-up requires additional steps
       }
     } catch (err: any) {
       setServerError(err.errors?.[0]?.message || "Invalid verification code");
-      console.error(JSON.stringify(err, null, 2));
     } finally {
       setIsLoading(false);
     }
@@ -267,7 +265,7 @@ export default function SignUpScreen() {
                     />
                     {!error && (
                       <Text className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                        Must be at least 8 characters
+                        Must be 8+ characters with uppercase, lowercase, number & special character
                       </Text>
                     )}
                   </>

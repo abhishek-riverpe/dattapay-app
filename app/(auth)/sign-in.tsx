@@ -98,13 +98,12 @@ export default function SignInScreen() {
             setShowEmailCode(true);
           }
         } else {
-          console.error(JSON.stringify(signInAttempt, null, 2));
+          // Sign-in requires additional steps
         }
       } catch (err: any) {
         setServerError(
           err.errors?.[0]?.message || "An error occurred during sign in"
         );
-        console.error(JSON.stringify(err, null, 2));
       } finally {
         setIsLoading(false);
       }
@@ -138,11 +137,10 @@ export default function SignInScreen() {
             },
           });
         } else {
-          console.error(JSON.stringify(signInAttempt, null, 2));
+          // Verification requires additional steps
         }
       } catch (err: any) {
         setServerError(err.errors?.[0]?.message || "Invalid verification code");
-        console.error(JSON.stringify(err, null, 2));
       } finally {
         setIsLoading(false);
       }
