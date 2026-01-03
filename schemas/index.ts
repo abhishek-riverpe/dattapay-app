@@ -95,10 +95,7 @@ export const personalInfoSchema = yup.object({
     .string()
     .required("Email is required")
     .email("Please enter a valid email address"),
-  phoneNumberPrefix: yup
-    .string()
-    .required("Country code is required")
-    .matches(/^\d{1,4}$/, "Invalid country code"),
+  phoneNumberPrefix: yup.string().required("Country code is required"),
   phoneNumber: yup
     .string()
     .required("Phone number is required")

@@ -84,8 +84,7 @@ export default function CompleteAccountScreen() {
         firstName: currentUser.firstName,
         lastName: currentUser.lastName,
         email: currentUser.email,
-        phoneNumberPrefix:
-          currentUser.phoneNumberPrefix?.replace("+", "") || "",
+        phoneNumberPrefix: currentUser.phoneNumberPrefix,
         phoneNumber: currentUser.phoneNumber,
         nationality: currentUser.nationality,
         dateOfBirth: dateOfBirth,
@@ -96,7 +95,7 @@ export default function CompleteAccountScreen() {
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         email: user.emailAddresses[0]?.emailAddress || "",
-        phoneNumberPrefix: "1",
+        phoneNumberPrefix: "+91",
         phoneNumber: "",
         nationality: "",
         dateOfBirth: "",
@@ -105,9 +104,9 @@ export default function CompleteAccountScreen() {
   }, [currentUser, user, reset]);
 
   const onSubmit = async (data: PersonalInfoFormData) => {
+    console.log("Submitting personal info:", data);
     setIsLoading(true);
     setServerError("");
-
     try {
       if (currentUser) {
         // Update existing user
@@ -155,7 +154,7 @@ export default function CompleteAccountScreen() {
   const hasErrors = Object.keys(errors).length > 0;
 
   const handleCountrySelect = (country: Country) => {
-    setValue("phoneNumberPrefix", country.dialCode.replace("+", ""));
+    setValue("phoneNumberPrefix", country.dialCode);
     setValue("nationality", country.code);
   };
 
