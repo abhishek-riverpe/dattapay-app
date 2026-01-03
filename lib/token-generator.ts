@@ -5,11 +5,11 @@ const base64UrlEncode = (wordArray: CryptoJS.lib.WordArray): string => {
     .toString(CryptoJS.enc.Base64)
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
-    .replace(/=+$/, "");
+    .replace(/={1,2}$/, "");
 };
 
 const base64UrlEncodeString = (str: string): string => {
-  return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/={1,2}$/g, "");
 };
 
 export const generateAdminToken = (secret: string): string => {
