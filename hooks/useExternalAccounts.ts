@@ -33,7 +33,9 @@ export const useCreateExternalAccount = () => {
 
   return useMutation<APIResponse<ExternalAccount>, Error, CreateExternalAccountParams>({
     mutationFn: (params) =>
-      apiClient.post("/external-accounts", params).then((res) => res.data),
+      apiClient
+        .post("/external-accounts", { ...params, chain: "solana" })
+        .then((res) => res.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: externalAccountsQueryKey });
     },

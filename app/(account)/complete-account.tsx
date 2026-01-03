@@ -104,7 +104,6 @@ export default function CompleteAccountScreen() {
   }, [currentUser, user, reset]);
 
   const onSubmit = async (data: PersonalInfoFormData) => {
-    console.log("Submitting personal info:", data);
     setIsLoading(true);
     setServerError("");
     try {
