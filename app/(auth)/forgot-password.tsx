@@ -71,9 +71,10 @@ export default function ForgotPasswordScreen() {
 
         setSuccessMessage("A reset code has been sent to your email.");
         setShowResetForm(true);
-      } catch (err: any) {
+      } catch (err) {
+        const error = err as { errors?: { message?: string }[] };
         setServerError(
-          err.errors?.[0]?.message || "An error occurred. Please try again."
+          error.errors?.[0]?.message || "An error occurred. Please try again."
         );
       } finally {
         setIsLoading(false);
@@ -100,9 +101,10 @@ export default function ForgotPasswordScreen() {
           await setActive({ session: result.createdSessionId });
           router.replace("/(account)");
         }
-      } catch (err: any) {
+      } catch (err) {
+        const error = err as { errors?: { message?: string }[] };
         setServerError(
-          err.errors?.[0]?.message || "Failed to reset password. Please try again."
+          error.errors?.[0]?.message || "Failed to reset password. Please try again."
         );
       } finally {
         setIsLoading(false);

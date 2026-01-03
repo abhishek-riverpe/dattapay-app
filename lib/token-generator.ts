@@ -12,9 +12,16 @@ const base64UrlEncodeString = (str: string): string => {
   return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/={1,2}$/g, "");
 };
 
+// Token expires in 1 hour
+const TOKEN_EXPIRY_SECONDS = 60 * 60;
+
 export const generateAdminToken = (secret: string): string => {
+  const now = Math.floor(Date.now() / 1000);
   const header = { alg: "HS256", typ: "JWT" };
-  const payload = { iat: Math.floor(Date.now() / 1000) };
+  const payload = {
+    iat: now,
+    exp: now + TOKEN_EXPIRY_SECONDS,
+  };
 
   const encodedHeader = base64UrlEncodeString(JSON.stringify(header));
   const encodedPayload = base64UrlEncodeString(JSON.stringify(payload));
@@ -27,6 +34,12 @@ export const generateAdminToken = (secret: string): string => {
 };
 
 let cachedToken: string | null = null;
+let tokenExpiry: number = 0;
+
+const isTokenExpired = (): boolean => {
+  // Refresh 5 minutes before actual expiry
+  return Date.now() / 1000 >= tokenExpiry - 300;
+};
 
 export const getOrCreateAdminToken = (): string | null => {
   const secret = process.env.EXPO_PUBLIC_ADMIN_TOKEN_SECRET;
@@ -34,8 +47,9 @@ export const getOrCreateAdminToken = (): string | null => {
     console.warn("EXPO_PUBLIC_ADMIN_TOKEN_SECRET is not configured");
     return null;
   }
-  if (!cachedToken) {
+  if (!cachedToken || isTokenExpired()) {
     cachedToken = generateAdminToken(secret);
+    tokenExpiry = Math.floor(Date.now() / 1000) + TOKEN_EXPIRY_SECONDS;
   }
   return cachedToken;
 };

@@ -78,7 +78,6 @@ export default function SignInScreen() {
             session: signInAttempt.createdSessionId,
             navigate: async ({ session }) => {
               if (session?.currentTask) {
-                console.log(session?.currentTask);
                 return;
               }
               router.replace("/(account)");
@@ -100,9 +99,10 @@ export default function SignInScreen() {
         } else {
           // Sign-in requires additional steps
         }
-      } catch (err: any) {
+      } catch (err) {
+        const error = err as { errors?: { message?: string }[] };
         setServerError(
-          err.errors?.[0]?.message || "An error occurred during sign in"
+          error.errors?.[0]?.message || "An error occurred during sign in"
         );
       } finally {
         setIsLoading(false);
@@ -130,7 +130,6 @@ export default function SignInScreen() {
             session: signInAttempt.createdSessionId,
             navigate: async ({ session }) => {
               if (session?.currentTask) {
-                console.log(session?.currentTask);
                 return;
               }
               router.replace("/(account)");
@@ -139,8 +138,9 @@ export default function SignInScreen() {
         } else {
           // Verification requires additional steps
         }
-      } catch (err: any) {
-        setServerError(err.errors?.[0]?.message || "Invalid verification code");
+      } catch (err) {
+        const error = err as { errors?: { message?: string }[] };
+        setServerError(error.errors?.[0]?.message || "Invalid verification code");
       } finally {
         setIsLoading(false);
       }

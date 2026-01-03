@@ -1,6 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 import * as Crypto from "expo-crypto";
 import * as LocalAuthentication from "expo-local-authentication";
+import Constants from "expo-constants";
 import elliptic from "elliptic";
 import CryptoJS from "crypto-js";
 
@@ -38,9 +39,9 @@ async function generateSalt(): Promise<string> {
  * This provides an additional layer of protection for the private key
  */
 async function deriveEncryptionKey(salt: string): Promise<string> {
-  // Use a combination of salt and a constant to derive the key
-  // In production, you might want to include additional device-specific data
-  const input = `dattapay_key_${salt}_encryption`;
+  // Include device-specific identifier for additional security
+  const installationId = Constants.installationId || "unknown";
+  const input = `dattapay_key_${salt}_${installationId}_encryption`;
   const hash = CryptoJS.SHA256(input);
   return hash.toString(CryptoJS.enc.Hex).substring(0, 32);
 }
@@ -199,21 +200,40 @@ export async function hasExistingKeys(): Promise<boolean> {
   return publicKey !== null;
 }
 
+// Mutex to prevent concurrent key generation
+let isGeneratingKeys = false;
+
 /**
  * Generates and stores a new key pair
  * Only call this on first address submission
  * Returns the public key for sending to the server
  */
 export async function generateAndStoreKeys(): Promise<string> {
-  const { publicKey, privateKey } = generateKeyPair();
+  // Prevent concurrent key generation
+  if (isGeneratingKeys) {
+    throw new Error("Key generation already in progress");
+  }
 
-  // Save private key with additional encryption
-  await savePrivateKey(privateKey);
+  // Check if keys already exist
+  const existingKey = await getPublicKey();
+  if (existingKey) {
+    return existingKey;
+  }
 
-  // Save public key to SecureStore
-  await savePublicKey(publicKey);
+  isGeneratingKeys = true;
+  try {
+    const { publicKey, privateKey } = generateKeyPair();
 
-  return publicKey;
+    // Save private key with additional encryption
+    await savePrivateKey(privateKey);
+
+    // Save public key to SecureStore
+    await savePublicKey(publicKey);
+
+    return publicKey;
+  } finally {
+    isGeneratingKeys = false;
+  }
 }
 
 /**

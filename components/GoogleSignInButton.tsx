@@ -52,16 +52,19 @@ export default function GoogleSignInButton({
           router.replace("/(account)/complete-account");
         }
       }
-    } catch (err: any) {
-      if (err.code === "ERR_REQUEST_CANCELED") {
+    } catch (err) {
+      const error = err as { code?: string; message?: string };
+      if (error.code === "ERR_REQUEST_CANCELED") {
         return;
       }
 
       Alert.alert(
         "Error",
-        err.message || "An error occurred during Google Sign-In"
+        error.message || "An error occurred during Google Sign-In"
       );
-      console.error("Google Sign-In error:", JSON.stringify(err, null, 2));
+      if (__DEV__) {
+        console.error("Google Sign-In error:", error.message || "Unknown error");
+      }
     }
   };
 

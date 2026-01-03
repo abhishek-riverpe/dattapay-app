@@ -20,7 +20,9 @@ export default function SignOutButton() {
       clearKycData();
       router.replace("/(auth)/sign-in");
     } catch (err) {
-      console.error(JSON.stringify(err, null, 2));
+      if (__DEV__) {
+        console.error("Sign out error:", err instanceof Error ? err.message : "Unknown error");
+      }
     }
   };
 

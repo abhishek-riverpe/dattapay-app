@@ -73,9 +73,10 @@ export default function SignUpScreen() {
 
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setPendingVerification(true);
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as { errors?: { message?: string }[] };
       setServerError(
-        err.errors?.[0]?.message || "An error occurred during sign up"
+        error.errors?.[0]?.message || "An error occurred during sign up"
       );
     } finally {
       setIsLoading(false);
@@ -98,7 +99,6 @@ export default function SignUpScreen() {
           session: signUpAttempt.createdSessionId,
           navigate: async ({ session }) => {
             if (session?.currentTask) {
-              console.log(session?.currentTask);
               return;
             }
             router.replace("/(account)");
@@ -108,8 +108,9 @@ export default function SignUpScreen() {
       } else {
         // Sign-up requires additional steps
       }
-    } catch (err: any) {
-      setServerError(err.errors?.[0]?.message || "Invalid verification code");
+    } catch (err) {
+      const error = err as { errors?: { message?: string }[] };
+      setServerError(error.errors?.[0]?.message || "Invalid verification code");
     } finally {
       setIsLoading(false);
     }

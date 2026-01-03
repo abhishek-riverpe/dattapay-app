@@ -9,12 +9,15 @@ interface BiometricLockProps {
   children: React.ReactNode;
 }
 
+const MAX_AUTH_ATTEMPTS = 5;
+
 export default function BiometricLock({ children }: BiometricLockProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [biometricType, setBiometricType] = useState<string>("Biometric");
   const [securityAvailable, setSecurityAvailable] = useState(true);
+  const [authAttempts, setAuthAttempts] = useState(0);
 
   useEffect(() => {
     checkBiometricSupport();
@@ -72,6 +75,12 @@ export default function BiometricLock({ children }: BiometricLockProps) {
   const authenticate = async () => {
     if (isAuthenticating) return;
 
+    // Check max attempts
+    if (authAttempts >= MAX_AUTH_ATTEMPTS) {
+      setError("Too many failed attempts. Please restart the app and try again.");
+      return;
+    }
+
     setIsAuthenticating(true);
     setError(null);
 
@@ -96,7 +105,9 @@ export default function BiometricLock({ children }: BiometricLockProps) {
 
       if (result.success) {
         setIsAuthenticated(true);
+        setAuthAttempts(0);
       } else if (result.error === "user_cancel") {
+        setAuthAttempts((prev) => prev + 1);
         setError("Authentication cancelled");
       } else if (result.error === "user_fallback") {
         setError(null);
@@ -104,9 +115,11 @@ export default function BiometricLock({ children }: BiometricLockProps) {
         setSecurityAvailable(false);
         setError("Please set up biometric authentication or a device passcode to use DattaPay.");
       } else {
+        setAuthAttempts((prev) => prev + 1);
         setError("Authentication failed. Please try again.");
       }
     } catch (err) {
+      setAuthAttempts((prev) => prev + 1);
       setError("An error occurred during authentication");
     } finally {
       setIsAuthenticating(false);
@@ -152,16 +165,18 @@ export default function BiometricLock({ children }: BiometricLockProps) {
               variant="primary"
               onPress={authenticate}
               loading={isAuthenticating}
-              disabled={isAuthenticating}
+              disabled={isAuthenticating || authAttempts >= MAX_AUTH_ATTEMPTS}
             >
               {isAuthenticating ? "Authenticating..." : `Unlock with ${biometricType}`}
             </ThemeButton>
 
-            <Pressable onPress={authenticate} className="mt-4">
-              <Text className="text-primary text-sm font-medium">
-                Try Again
-              </Text>
-            </Pressable>
+            {authAttempts < MAX_AUTH_ATTEMPTS && (
+              <Pressable onPress={authenticate} className="mt-4" disabled={isAuthenticating}>
+                <Text className="text-primary text-sm font-medium">
+                  Try Again
+                </Text>
+              </Pressable>
+            )}
           </>
         ) : (
           <View className="w-full">
