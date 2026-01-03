@@ -37,6 +37,7 @@ import {
 import useBiometricAuth from "@/hooks/useBiometricAuth";
 import generateSignature from "@/lib/generate-signature";
 import { getPublicKey, getPrivateKey } from "@/lib/key-generator";
+import { validateSolanaAddress, sanitizeSolanaAddress } from "@/lib/address-validator";
 
 interface WithdrawModalProps {
   visible: boolean;
@@ -116,7 +117,19 @@ export default function WithdrawModal({
   };
 
   const handleQRScan = (data: string) => {
-    setDestinationAddress(data);
+    const validationError = validateSolanaAddress(data);
+    if (validationError) {
+      Toast.show({
+        type: "error",
+        text1: "Invalid Address",
+        text2: validationError,
+      });
+      return;
+    }
+    const sanitized = sanitizeSolanaAddress(data);
+    if (sanitized) {
+      setDestinationAddress(sanitized);
+    }
   };
 
   const setQuickAmount = (percentage: number) => {
@@ -156,10 +169,31 @@ export default function WithdrawModal({
         return;
       }
 
+      // Validate Solana address format
+      const validationError = validateSolanaAddress(destinationAddress);
+      if (validationError) {
+        Toast.show({
+          type: "error",
+          text1: "Invalid Address",
+          text2: validationError,
+        });
+        return;
+      }
+
+      const sanitizedAddress = sanitizeSolanaAddress(destinationAddress);
+      if (!sanitizedAddress) {
+        Toast.show({
+          type: "error",
+          text1: "Invalid Address",
+          text2: "Please enter a valid Solana address",
+        });
+        return;
+      }
+
       setIsProcessing(true);
       try {
         const result = await createExternalAccount.mutateAsync({
-          walletAddress: destinationAddress.trim(),
+          walletAddress: sanitizedAddress,
           label: label.trim() || undefined,
         });
 

@@ -1,6 +1,32 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
+
+// Custom secure storage adapter for Zustand
+const secureStorage: StateStorage = {
+  getItem: async (name: string): Promise<string | null> => {
+    try {
+      return await SecureStore.getItemAsync(name);
+    } catch {
+      return null;
+    }
+  },
+  setItem: async (name: string, value: string): Promise<void> => {
+    try {
+      await SecureStore.setItemAsync(name, value);
+    } catch {
+      // SecureStore has a 2048 byte limit, handle gracefully
+      console.warn("Failed to store data in SecureStore");
+    }
+  },
+  removeItem: async (name: string): Promise<void> => {
+    try {
+      await SecureStore.deleteItemAsync(name);
+    } catch {
+      // Ignore removal errors
+    }
+  },
+};
 
 interface KycState {
   kycLink: string | null;
@@ -40,7 +66,7 @@ export const useKycStore = create<KycState>()(
     }),
     {
       name: "kyc-storage",
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => secureStorage),
     }
   )
 );

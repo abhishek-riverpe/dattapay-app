@@ -12,10 +12,23 @@ type CreateWalletResult = {
 
 const createWallet = async (): Promise<CreateWalletResult> => {
   const publicKey = await getPublicKey();
-  const privateKey = await getPrivateKey();
 
-  if (!publicKey || !privateKey) {
-    throw new Error("Keys not found. Please complete authentication first.");
+  if (!publicKey) {
+    throw new Error("Keys not found. Please complete account setup first.");
+  }
+
+  let privateKey: string | null;
+  try {
+    privateKey = await getPrivateKey();
+  } catch (error) {
+    if (error instanceof Error && error.message === "Biometric authentication required") {
+      throw new Error("Please authenticate with biometrics to continue.");
+    }
+    throw error;
+  }
+
+  if (!privateKey) {
+    throw new Error("Failed to retrieve private key.");
   }
 
   // Step 1: Prepare wallet creation
