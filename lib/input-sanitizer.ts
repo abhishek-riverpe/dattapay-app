@@ -11,11 +11,14 @@ export function sanitizeLabel(input: string): string {
     return "";
   }
 
-  // Remove control characters and null bytes
-  let sanitized = input.replace(/[\x00-\x1F\x7F]/g, "");
+  // Limit length first to prevent ReDoS
+  let sanitized = input.length > 1000 ? input.substring(0, 1000) : input;
 
-  // Remove any HTML/script tags
-  sanitized = sanitized.replace(/<[^>]*>/g, "");
+  // Remove control characters and null bytes
+  sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, "");
+
+  // Remove any HTML/script tags (bounded quantifier to prevent ReDoS)
+  sanitized = sanitized.replace(/<[^>]{0,500}>/g, "");
 
   // Remove potential SQL injection characters
   sanitized = sanitized.replace(/[;'"\\]/g, "");
@@ -60,11 +63,14 @@ export function sanitizeText(input: string, maxLength: number = 500): string {
     return "";
   }
 
-  // Remove null bytes and control characters
-  let sanitized = input.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+  // Limit length first to prevent ReDoS
+  let sanitized = input.length > maxLength * 2 ? input.substring(0, maxLength * 2) : input;
 
-  // Remove any HTML/script tags
-  sanitized = sanitized.replace(/<[^>]*>/g, "");
+  // Remove null bytes and control characters
+  sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+
+  // Remove any HTML/script tags (bounded quantifier to prevent ReDoS)
+  sanitized = sanitized.replace(/<[^>]{0,500}>/g, "");
 
   // Trim and limit length
   return sanitized.trim().substring(0, maxLength);
