@@ -14,9 +14,6 @@ export function sanitizeLabel(input: string): string {
   // Limit length first to prevent ReDoS
   let sanitized = input.length > 1000 ? input.substring(0, 1000) : input;
 
-  // Remove control characters and null bytes
-  sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, "");
-
   // Remove any HTML/script tags (bounded quantifier to prevent ReDoS)
   sanitized = sanitized.replace(/<[^>]{0,500}>/g, "");
 
@@ -65,9 +62,6 @@ export function sanitizeText(input: string, maxLength: number = 500): string {
 
   // Limit length first to prevent ReDoS
   let sanitized = input.length > maxLength * 2 ? input.substring(0, maxLength * 2) : input;
-
-  // Remove null bytes and control characters
-  sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
 
   // Remove any HTML/script tags (bounded quantifier to prevent ReDoS)
   sanitized = sanitized.replace(/<[^>]{0,500}>/g, "");
