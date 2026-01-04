@@ -19,6 +19,48 @@ interface BankDetailsModalProps {
   onClose: () => void;
 }
 
+interface DetailFieldProps {
+  label: string;
+  value: string;
+  fieldKey: string;
+  copiedField: string | null;
+  onCopy: (field: string, value: string) => void;
+  isMonospace?: boolean;
+  showRequired?: boolean;
+}
+
+function DetailField({ label, value, fieldKey, copiedField, onCopy, isMonospace, showRequired }: DetailFieldProps) {
+  const isCopied = copiedField === fieldKey;
+  const textStyle = isMonospace
+    ? "text-gray-900 dark:text-white text-base font-medium font-mono"
+    : "text-gray-900 dark:text-white text-base font-medium";
+
+  return (
+    <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+      <View className="flex-row items-center justify-between mb-2">
+        <View className="flex-row items-center">
+          <Text className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">
+            {label}
+          </Text>
+          {showRequired && (
+            <View className="bg-red-500 px-2 py-0.5 rounded ml-2">
+              <Text className="text-white text-xs font-medium">Required</Text>
+            </View>
+          )}
+        </View>
+        <Pressable onPress={() => onCopy(fieldKey, value)}>
+          {isCopied ? (
+            <CheckCircle size={18} color="#10B981" />
+          ) : (
+            <Copy size={18} color="#6B7280" />
+          )}
+        </Pressable>
+      </View>
+      <Text className={textStyle}>{value}</Text>
+    </View>
+  );
+}
+
 export default function BankDetailsModal({
   visible,
   onClose,
@@ -40,7 +82,7 @@ export default function BankDetailsModal({
     try {
       const response = await apiClient.get("/api/bank-details");
       setBankDetails(response.data.data);
-    } catch (err) {
+    } catch {
       setError("Failed to load bank details. Please try again.");
     } finally {
       setIsLoading(false);
@@ -78,6 +120,121 @@ Reference/Memo (Required): ${bankDetails.reference}`;
     }
   };
 
+  const getCopyAllIcon = () => {
+    const color = "white";
+    return copiedField === "all"
+      ? <CheckCircle size={18} color={color} />
+      : <Copy size={18} color={color} />;
+  };
+
+  const renderLoading = () => (
+    <View className="items-center justify-center py-12">
+      <ActivityIndicator size="large" color="#005AEE" />
+      <Text className="text-gray-500 dark:text-gray-400 mt-4">
+        Loading bank details...
+      </Text>
+    </View>
+  );
+
+  const renderError = () => (
+    <View className="items-center justify-center py-12">
+      <AlertCircle size={48} color="#EF4444" />
+      <Text className="text-red-500 dark:text-red-400 mt-4 text-center">
+        {error}
+      </Text>
+      <ThemeButton
+        variant="secondary"
+        onPress={fetchBankDetails}
+        className="mt-4"
+      >
+        Retry
+      </ThemeButton>
+    </View>
+  );
+
+  const renderDetails = () => {
+    if (!bankDetails) return null;
+    return (
+      <>
+        <View className="gap-4">
+          <DetailField
+            label="Account Holder Name"
+            value={bankDetails.accountHolderName}
+            fieldKey="accountHolder"
+            copiedField={copiedField}
+            onCopy={copyField}
+          />
+          <DetailField
+            label="Bank Name"
+            value={bankDetails.bankName}
+            fieldKey="bankName"
+            copiedField={copiedField}
+            onCopy={copyField}
+          />
+          <DetailField
+            label="Routing Number"
+            value={bankDetails.routingNumber}
+            fieldKey="routingNumber"
+            copiedField={copiedField}
+            onCopy={copyField}
+            isMonospace
+          />
+          <DetailField
+            label="Account Number"
+            value={bankDetails.accountNumber}
+            fieldKey="accountNumber"
+            copiedField={copiedField}
+            onCopy={copyField}
+            isMonospace
+          />
+          <DetailField
+            label="Reference/Memo"
+            value={bankDetails.reference}
+            fieldKey="reference"
+            copiedField={copiedField}
+            onCopy={copyField}
+            isMonospace
+            showRequired
+          />
+        </View>
+
+        <View className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mt-5">
+          <View className="flex-row items-start">
+            <Info size={18} color="#3B82F6" />
+            <Text className="text-blue-700 dark:text-blue-300 text-sm ml-2 flex-1">
+              Funds arrive in USD and auto-convert to USDC.
+            </Text>
+          </View>
+        </View>
+
+        <View className="mt-6 gap-3">
+          <ThemeButton
+            variant="primary"
+            onPress={copyAllDetails}
+            leftIcon={getCopyAllIcon()}
+          >
+            {copiedField === "all" ? "Copied!" : "Copy All Details"}
+          </ThemeButton>
+
+          <ThemeButton
+            variant="secondary"
+            onPress={shareDetails}
+            leftIcon={<Share2 size={18} color="#374151" />}
+          >
+            {copiedField === "shared" ? "Copied to Share!" : "Share"}
+          </ThemeButton>
+        </View>
+      </>
+    );
+  };
+
+  const renderContent = () => {
+    if (isLoading) return renderLoading();
+    if (error) return renderError();
+    if (bankDetails) return renderDetails();
+    return null;
+  };
+
   return (
     <Modal
       visible={visible}
@@ -86,7 +243,6 @@ Reference/Memo (Required): ${bankDetails.reference}`;
       onRequestClose={onClose}
     >
       <View className="flex-1 bg-white dark:bg-[#121212]">
-        {/* Modal Header */}
         <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
           <Text className="text-xl font-bold text-gray-900 dark:text-white">
             Bank Account Details
@@ -100,188 +256,7 @@ Reference/Memo (Required): ${bankDetails.reference}`;
         </View>
 
         <ScrollView className="flex-1 px-6 py-5">
-          {isLoading ? (
-            <View className="items-center justify-center py-12">
-              <ActivityIndicator size="large" color="#005AEE" />
-              <Text className="text-gray-500 dark:text-gray-400 mt-4">
-                Loading bank details...
-              </Text>
-            </View>
-          ) : error ? (
-            <View className="items-center justify-center py-12">
-              <AlertCircle size={48} color="#EF4444" />
-              <Text className="text-red-500 dark:text-red-400 mt-4 text-center">
-                {error}
-              </Text>
-              <ThemeButton
-                variant="secondary"
-                onPress={fetchBankDetails}
-                className="mt-4"
-              >
-                Retry
-              </ThemeButton>
-            </View>
-          ) : bankDetails ? (
-            <>
-              {/* Detail Fields */}
-              <View className="gap-4">
-                {/* Account Holder Name */}
-                <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                  <View className="flex-row items-center justify-between mb-2">
-                    <Text className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">
-                      Account Holder Name
-                    </Text>
-                    <Pressable
-                      onPress={() =>
-                        copyField("accountHolder", bankDetails.accountHolderName)
-                      }
-                    >
-                      {copiedField === "accountHolder" ? (
-                        <CheckCircle size={18} color="#10B981" />
-                      ) : (
-                        <Copy size={18} color="#6B7280" />
-                      )}
-                    </Pressable>
-                  </View>
-                  <Text className="text-gray-900 dark:text-white text-base font-medium">
-                    {bankDetails.accountHolderName}
-                  </Text>
-                </View>
-
-                {/* Bank Name */}
-                <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                  <View className="flex-row items-center justify-between mb-2">
-                    <Text className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">
-                      Bank Name
-                    </Text>
-                    <Pressable
-                      onPress={() => copyField("bankName", bankDetails.bankName)}
-                    >
-                      {copiedField === "bankName" ? (
-                        <CheckCircle size={18} color="#10B981" />
-                      ) : (
-                        <Copy size={18} color="#6B7280" />
-                      )}
-                    </Pressable>
-                  </View>
-                  <Text className="text-gray-900 dark:text-white text-base font-medium">
-                    {bankDetails.bankName}
-                  </Text>
-                </View>
-
-                {/* Routing Number */}
-                <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                  <View className="flex-row items-center justify-between mb-2">
-                    <Text className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">
-                      Routing Number
-                    </Text>
-                    <Pressable
-                      onPress={() =>
-                        copyField("routingNumber", bankDetails.routingNumber)
-                      }
-                    >
-                      {copiedField === "routingNumber" ? (
-                        <CheckCircle size={18} color="#10B981" />
-                      ) : (
-                        <Copy size={18} color="#6B7280" />
-                      )}
-                    </Pressable>
-                  </View>
-                  <Text className="text-gray-900 dark:text-white text-base font-medium font-mono">
-                    {bankDetails.routingNumber}
-                  </Text>
-                </View>
-
-                {/* Account Number */}
-                <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                  <View className="flex-row items-center justify-between mb-2">
-                    <Text className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">
-                      Account Number
-                    </Text>
-                    <Pressable
-                      onPress={() =>
-                        copyField("accountNumber", bankDetails.accountNumber)
-                      }
-                    >
-                      {copiedField === "accountNumber" ? (
-                        <CheckCircle size={18} color="#10B981" />
-                      ) : (
-                        <Copy size={18} color="#6B7280" />
-                      )}
-                    </Pressable>
-                  </View>
-                  <Text className="text-gray-900 dark:text-white text-base font-medium font-mono">
-                    {bankDetails.accountNumber}
-                  </Text>
-                </View>
-
-                {/* Reference/Memo with Required Badge */}
-                <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                  <View className="flex-row items-center justify-between mb-2">
-                    <View className="flex-row items-center">
-                      <Text className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">
-                        Reference/Memo
-                      </Text>
-                      <View className="bg-red-500 px-2 py-0.5 rounded ml-2">
-                        <Text className="text-white text-xs font-medium">
-                          Required
-                        </Text>
-                      </View>
-                    </View>
-                    <Pressable
-                      onPress={() =>
-                        copyField("reference", bankDetails.reference)
-                      }
-                    >
-                      {copiedField === "reference" ? (
-                        <CheckCircle size={18} color="#10B981" />
-                      ) : (
-                        <Copy size={18} color="#6B7280" />
-                      )}
-                    </Pressable>
-                  </View>
-                  <Text className="text-gray-900 dark:text-white text-base font-medium font-mono">
-                    {bankDetails.reference}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Info Note */}
-              <View className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mt-5">
-                <View className="flex-row items-start">
-                  <Info size={18} color="#3B82F6" />
-                  <Text className="text-blue-700 dark:text-blue-300 text-sm ml-2 flex-1">
-                    Funds arrive in USD and auto-convert to USDC.
-                  </Text>
-                </View>
-              </View>
-
-              {/* Action Buttons */}
-              <View className="mt-6 gap-3">
-                <ThemeButton
-                  variant="primary"
-                  onPress={copyAllDetails}
-                  leftIcon={
-                    copiedField === "all" ? (
-                      <CheckCircle size={18} color="white" />
-                    ) : (
-                      <Copy size={18} color="white" />
-                    )
-                  }
-                >
-                  {copiedField === "all" ? "Copied!" : "Copy All Details"}
-                </ThemeButton>
-
-                <ThemeButton
-                  variant="secondary"
-                  onPress={shareDetails}
-                  leftIcon={<Share2 size={18} color="#374151" />}
-                >
-                  {copiedField === "shared" ? "Copied to Share!" : "Share"}
-                </ThemeButton>
-              </View>
-            </>
-          ) : null}
+          {renderContent()}
         </ScrollView>
       </View>
     </Modal>

@@ -283,36 +283,91 @@ export default function BiometricLock({ children }: BiometricLockProps) {
 
   const isLockedOut = lockoutUntil && lockoutUntil > Date.now();
 
+  const getStatusIcon = () => {
+    if (isLockedOut) return <Clock size={48} color="#F59E0B" />;
+    if (securityAvailable) return <Fingerprint size={48} color="#005AEE" />;
+    return <ShieldAlert size={48} color="#EF4444" />;
+  };
+
+  const getTitle = () => {
+    if (isLockedOut) return "Temporarily Locked";
+    if (securityAvailable) return "Authentication Required";
+    return "Security Required";
+  };
+
+  const getSubtitle = () => {
+    if (isLockedOut) return "Too many failed attempts";
+    if (securityAvailable) return `Use ${biometricType} to unlock DattaPay`;
+    return "Please set up device security to use DattaPay";
+  };
+
+  const getButtonText = () => {
+    if (isAuthenticating) return "Authenticating...";
+    if (isLockedOut) return "Please Wait";
+    return `Unlock with ${biometricType}`;
+  };
+
+  const renderSecurityAvailable = () => (
+    <>
+      <ThemeButton
+        variant="primary"
+        onPress={authenticate}
+        loading={isAuthenticating}
+        disabled={isAuthenticating || !!isLockedOut}
+      >
+        {getButtonText()}
+      </ThemeButton>
+
+      {!isLockedOut && authAttempts > 0 && (
+        <Text className="text-gray-500 dark:text-gray-400 text-xs mt-2">
+          {ATTEMPTS_PER_LEVEL - authAttempts} attempts remaining
+        </Text>
+      )}
+
+      {!isLockedOut && (
+        <Pressable onPress={authenticate} className="mt-4" disabled={isAuthenticating}>
+          <Text className="text-primary text-sm font-medium">
+            Try Again
+          </Text>
+        </Pressable>
+      )}
+    </>
+  );
+
+  const renderSecurityUnavailable = () => (
+    <View className="w-full">
+      <View className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+        <Text className="text-amber-700 dark:text-amber-400 text-sm text-center">
+          To protect your funds, DattaPay requires device security. Please
+          go to your device settings and set up a passcode, fingerprint, or
+          Face ID.
+        </Text>
+      </View>
+      <ThemeButton
+        variant="secondary"
+        onPress={authenticate}
+        className="mt-4"
+      >
+        Check Again
+      </ThemeButton>
+    </View>
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-[#121212]">
       <View className="flex-1 items-center justify-center px-6">
         <View className="w-24 h-24 bg-primary/10 rounded-full items-center justify-center mb-8">
-          {isLockedOut ? (
-            <Clock size={48} color="#F59E0B" />
-          ) : securityAvailable ? (
-            <Fingerprint size={48} color="#005AEE" />
-          ) : (
-            <ShieldAlert size={48} color="#EF4444" />
-          )}
+          {getStatusIcon()}
         </View>
 
         <Text className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">
-          {isLockedOut
-            ? "Temporarily Locked"
-            : securityAvailable
-              ? "Authentication Required"
-              : "Security Required"}
+          {getTitle()}
         </Text>
 
         <Text className="text-base text-gray-600 dark:text-gray-400 text-center mb-8">
-          {isLockedOut
-            ? "Too many failed attempts"
-            : securityAvailable
-              ? `Use ${biometricType} to unlock DattaPay`
-              : "Please set up device security to use DattaPay"}
+          {getSubtitle()}
         </Text>
 
-        {/* Lockout Timer Display */}
         {isLockedOut && remainingTime && (
           <View className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6 w-full">
             <View className="flex-row items-center justify-center">
@@ -335,53 +390,7 @@ export default function BiometricLock({ children }: BiometricLockProps) {
           </View>
         )}
 
-        {securityAvailable ? (
-          <>
-            <ThemeButton
-              variant="primary"
-              onPress={authenticate}
-              loading={isAuthenticating}
-              disabled={isAuthenticating || !!isLockedOut}
-            >
-              {isAuthenticating
-                ? "Authenticating..."
-                : isLockedOut
-                  ? "Please Wait"
-                  : `Unlock with ${biometricType}`}
-            </ThemeButton>
-
-            {!isLockedOut && authAttempts > 0 && (
-              <Text className="text-gray-500 dark:text-gray-400 text-xs mt-2">
-                {ATTEMPTS_PER_LEVEL - authAttempts} attempts remaining
-              </Text>
-            )}
-
-            {!isLockedOut && (
-              <Pressable onPress={authenticate} className="mt-4" disabled={isAuthenticating}>
-                <Text className="text-primary text-sm font-medium">
-                  Try Again
-                </Text>
-              </Pressable>
-            )}
-          </>
-        ) : (
-          <View className="w-full">
-            <View className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
-              <Text className="text-amber-700 dark:text-amber-400 text-sm text-center">
-                To protect your funds, DattaPay requires device security. Please
-                go to your device settings and set up a passcode, fingerprint, or
-                Face ID.
-              </Text>
-            </View>
-            <ThemeButton
-              variant="secondary"
-              onPress={authenticate}
-              className="mt-4"
-            >
-              Check Again
-            </ThemeButton>
-          </View>
-        )}
+        {securityAvailable ? renderSecurityAvailable() : renderSecurityUnavailable()}
       </View>
     </SafeAreaView>
   );

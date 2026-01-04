@@ -361,6 +361,481 @@ export default function WithdrawModal({
   const receiveAmount = simulationData?.quote?.outAmount?.amount || 0;
   const totalFees = simulationData?.quote?.fees?.totalFees?.amount || 0;
 
+  const renderStep1 = () => (
+    <View>
+      {/* Crypto Selection */}
+      <Text className="text-gray-900 dark:text-white font-semibold text-base mb-3">
+        Select Crypto
+      </Text>
+      <View className="flex-row gap-3 mb-6">
+        <Pressable
+          onPress={() => setSelectedCrypto("USDC")}
+          className={`flex-1 p-4 rounded-xl border-2 ${
+            selectedCrypto === "USDC"
+              ? "border-primary bg-primary/5"
+              : "border-gray-200 dark:border-gray-700"
+          }`}
+        >
+          <View className="flex-row items-center">
+            <View
+              className={`w-5 h-5 rounded-full border-2 mr-3 items-center justify-center ${
+                selectedCrypto === "USDC"
+                  ? "border-primary"
+                  : "border-gray-300 dark:border-gray-600"
+              }`}
+            >
+              {selectedCrypto === "USDC" && (
+                <View className="w-3 h-3 rounded-full bg-primary" />
+              )}
+            </View>
+            <Text className="text-gray-900 dark:text-white font-medium">
+              USDC
+            </Text>
+          </View>
+        </Pressable>
+        <Pressable
+          onPress={() => setSelectedCrypto("USDT")}
+          className={`flex-1 p-4 rounded-xl border-2 ${
+            selectedCrypto === "USDT"
+              ? "border-primary bg-primary/5"
+              : "border-gray-200 dark:border-gray-700"
+          }`}
+        >
+          <View className="flex-row items-center">
+            <View
+              className={`w-5 h-5 rounded-full border-2 mr-3 items-center justify-center ${
+                selectedCrypto === "USDT"
+                  ? "border-primary"
+                  : "border-gray-300 dark:border-gray-600"
+              }`}
+            >
+              {selectedCrypto === "USDT" && (
+                <View className="w-3 h-3 rounded-full bg-primary" />
+              )}
+            </View>
+            <Text className="text-gray-900 dark:text-white font-medium">
+              USDT
+            </Text>
+          </View>
+        </Pressable>
+      </View>
+
+      {/* Network (Locked) */}
+      <Text className="text-gray-900 dark:text-white font-semibold text-base mb-3">
+        Network
+      </Text>
+      <View className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 mb-6 flex-row items-center justify-between">
+        <Text className="text-gray-900 dark:text-white font-medium">
+          Solana
+        </Text>
+        <Lock size={18} color="#6B7280" />
+      </View>
+
+      {/* Destination Selection */}
+      <Text className="text-gray-900 dark:text-white font-semibold text-base mb-3">
+        Destination
+      </Text>
+
+      {isLoadingAccounts ? (
+        <View className="items-center py-8">
+          <ActivityIndicator size="large" color="#6366F1" />
+        </View>
+      ) : (
+        <View className="mb-4">
+          {/* Existing Accounts */}
+          {withdrawalAccounts.map((account) => (
+            <Pressable
+              key={account.id}
+              onPress={() => handleSelectAccount(account)}
+              className={`p-4 rounded-xl border-2 mb-3 ${
+                selectedAccountId === account.id && !isAddingNew
+                  ? "border-primary bg-primary/5"
+                  : "border-gray-200 dark:border-gray-700"
+              }`}
+            >
+              <View className="flex-row items-center">
+                <View
+                  className={`w-5 h-5 rounded-full border-2 mr-3 items-center justify-center ${
+                    selectedAccountId === account.id && !isAddingNew
+                      ? "border-primary"
+                      : "border-gray-300 dark:border-gray-600"
+                  }`}
+                >
+                  {selectedAccountId === account.id &&
+                    !isAddingNew && (
+                      <View className="w-3 h-3 rounded-full bg-primary" />
+                    )}
+                </View>
+                <View className="flex-1">
+                  <Text className="text-gray-900 dark:text-white font-medium">
+                    {account.label || "External Wallet"}
+                  </Text>
+                  <Text className="text-gray-500 dark:text-gray-400 text-sm font-mono">
+                    {truncateAddress(account.walletAddress)}
+                  </Text>
+                </View>
+                <Wallet size={20} color="#6B7280" />
+              </View>
+            </Pressable>
+          ))}
+
+          {/* Add New Account Option */}
+          <Pressable
+            onPress={handleAddNewToggle}
+            className={`p-4 rounded-xl border-2 border-dashed ${
+              isAddingNew
+                ? "border-primary bg-primary/5"
+                : "border-gray-300 dark:border-gray-600"
+            }`}
+          >
+            <View className="flex-row items-center justify-center">
+              <Plus size={20} color={isAddingNew ? "#6366F1" : "#6B7280"} />
+              <Text
+                className={`ml-2 font-medium ${
+                  isAddingNew
+                    ? "text-primary"
+                    : "text-gray-500 dark:text-gray-400"
+                }`}
+              >
+                Add New Address
+              </Text>
+            </View>
+          </Pressable>
+        </View>
+      )}
+
+      {/* New Account Form */}
+      {isAddingNew && (
+        <View className="mt-4">
+          {/* Label */}
+          <Text className="text-gray-900 dark:text-white font-semibold text-base mb-3">
+            Label (Optional)
+          </Text>
+          <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 mb-4">
+            <TextInput
+              value={label}
+              onChangeText={(text) => setLabel(sanitizeLabel(text))}
+              placeholder="e.g., My Binance Wallet"
+              placeholderTextColor="#9CA3AF"
+              className="text-gray-900 dark:text-white text-base"
+              maxLength={100}
+            />
+          </View>
+
+          {/* Destination Address */}
+          <Text className="text-gray-900 dark:text-white font-semibold text-base mb-3">
+            Destination Address
+          </Text>
+          <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 flex-row items-center mb-4">
+            <TextInput
+              value={destinationAddress}
+              onChangeText={setDestinationAddress}
+              placeholder="Enter Solana address..."
+              placeholderTextColor="#9CA3AF"
+              className="flex-1 text-gray-900 dark:text-white text-base"
+            />
+            <Pressable onPress={pasteAddress} className="p-2">
+              <ClipboardPaste size={20} color="#6B7280" />
+            </Pressable>
+            <Pressable
+              onPress={() => setShowScanner(true)}
+              className="p-2"
+            >
+              <ScanLine size={20} color="#6B7280" />
+            </Pressable>
+          </View>
+        </View>
+      )}
+
+      {/* Warning */}
+      <View className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6">
+        <View className="flex-row items-start">
+          <AlertTriangle size={18} color="#F59E0B" />
+          <Text className="text-amber-700 dark:text-amber-300 text-sm ml-2 flex-1">
+            Withdrawals are irreversible. Double-check the address
+            matches the Solana network.
+          </Text>
+        </View>
+      </View>
+
+      <ThemeButton
+        variant="primary"
+        onPress={handleStep1Continue}
+        disabled={
+          isProcessing ||
+          (!isAddingNew && !selectedAccountId) ||
+          (isAddingNew && !destinationAddress.trim())
+        }
+      >
+        {isProcessing ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          "Continue"
+        )}
+      </ThemeButton>
+    </View>
+  );
+
+  const renderStep2 = () => (
+    <View>
+      {/* Available Balance */}
+      <View className="mb-6">
+        <Text className="text-gray-500 dark:text-gray-400 text-sm mb-1">
+          Available Balance
+        </Text>
+        <Text className="text-gray-900 dark:text-white text-2xl font-bold">
+          ${availableBalance.toFixed(2)} {selectedCrypto}
+        </Text>
+      </View>
+
+      {/* Amount Input */}
+      <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5 mb-4 items-center">
+        <Text className="text-gray-500 dark:text-gray-400 text-sm mb-2">
+          Enter Amount
+        </Text>
+        <View className="flex-row items-center">
+          <Text className="text-gray-900 dark:text-white text-3xl font-bold">
+            $
+          </Text>
+          <TextInput
+            value={withdrawAmount}
+            onChangeText={(text) => setWithdrawAmount(sanitizeAmount(text))}
+            placeholder="0.00"
+            placeholderTextColor="#9CA3AF"
+            keyboardType="decimal-pad"
+            className="text-gray-900 dark:text-white text-3xl font-bold text-center min-w-[100px]"
+            maxLength={15}
+          />
+        </View>
+      </View>
+
+      {/* Quick Amount Buttons */}
+      <View className="flex-row gap-3 mb-6">
+        <Pressable
+          onPress={() => setQuickAmount(25)}
+          className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-gray-800"
+        >
+          <Text className="text-center text-gray-900 dark:text-white font-medium">
+            25%
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setQuickAmount(50)}
+          className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-gray-800"
+        >
+          <Text className="text-center text-gray-900 dark:text-white font-medium">
+            50%
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setQuickAmount(100)}
+          className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-gray-800"
+        >
+          <Text className="text-center text-gray-900 dark:text-white font-medium">
+            Max
+          </Text>
+        </Pressable>
+      </View>
+
+      {/* Destination Info */}
+      <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-6">
+        <View className="flex-row justify-between mb-2">
+          <Text className="text-gray-500 dark:text-gray-400 text-sm">
+            Sending to
+          </Text>
+          <Text className="text-gray-900 dark:text-white font-medium">
+            {selectedAccount?.label || "External Wallet"}
+          </Text>
+        </View>
+        <View className="flex-row justify-between">
+          <Text className="text-gray-500 dark:text-gray-400 text-sm">
+            Address
+          </Text>
+          <Text className="text-gray-900 dark:text-white font-medium font-mono">
+            {truncateAddress(
+              selectedAccount?.walletAddress || destinationAddress
+            )}
+          </Text>
+        </View>
+      </View>
+
+      <ThemeButton
+        variant="primary"
+        onPress={handleStep2Continue}
+        disabled={
+          isProcessing ||
+          !withdrawAmount ||
+          parseFloat(withdrawAmount) <= 0 ||
+          parseFloat(withdrawAmount) > availableBalance
+        }
+      >
+        {isProcessing ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          "Continue"
+        )}
+      </ThemeButton>
+    </View>
+  );
+
+  const renderStep3 = () => {
+    if (!simulationData) return null;
+    return (
+      <View>
+        <Text className="text-gray-900 dark:text-white font-semibold text-lg mb-4">
+          Review Withdrawal
+        </Text>
+
+        {/* Summary Card */}
+        <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5 mb-6">
+          <View className="flex-row justify-between mb-4">
+            <Text className="text-gray-500 dark:text-gray-400 text-sm">
+              Crypto
+            </Text>
+            <Text className="text-gray-900 dark:text-white font-medium">
+              {selectedCrypto}
+            </Text>
+          </View>
+          <View className="flex-row justify-between mb-4">
+            <Text className="text-gray-500 dark:text-gray-400 text-sm">
+              Network
+            </Text>
+            <Text className="text-gray-900 dark:text-white font-medium">
+              Solana
+            </Text>
+          </View>
+          {(selectedAccount?.label || label) && (
+            <View className="flex-row justify-between mb-4">
+              <Text className="text-gray-500 dark:text-gray-400 text-sm">
+                Label
+              </Text>
+              <Text className="text-gray-900 dark:text-white font-medium">
+                {selectedAccount?.label || label}
+              </Text>
+            </View>
+          )}
+          <View className="flex-row justify-between mb-4">
+            <Text className="text-gray-500 dark:text-gray-400 text-sm">
+              To Address
+            </Text>
+            <Text className="text-gray-900 dark:text-white font-medium font-mono">
+              {truncateAddress(
+                selectedAccount?.walletAddress || destinationAddress
+              )}
+            </Text>
+          </View>
+          <View className="flex-row justify-between mb-4">
+            <Text className="text-gray-500 dark:text-gray-400 text-sm">
+              Amount
+            </Text>
+            <Text className="text-gray-900 dark:text-white font-medium">
+              ${sendAmount.toFixed(2)} {simulationData.quote.inAmount.currency}
+            </Text>
+          </View>
+          <View className="flex-row justify-between mb-4">
+            <Text className="text-gray-500 dark:text-gray-400 text-sm">
+              Fees
+            </Text>
+            <Text className="text-gray-900 dark:text-white font-medium">
+              ${totalFees.toFixed(2)} {simulationData.quote.fees.totalFees.currency}
+            </Text>
+          </View>
+          <View className="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <View className="flex-row justify-between">
+              <Text className="text-gray-900 dark:text-white font-semibold">
+                You'll Receive
+              </Text>
+              <Text className="text-primary font-bold text-lg">
+                ${receiveAmount.toFixed(2)} {simulationData.quote.outAmount.currency}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <ThemeButton
+          variant="primary"
+          onPress={handleConfirmWithdraw}
+          disabled={isProcessing}
+        >
+          {isProcessing ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            "Confirm Withdraw"
+          )}
+        </ThemeButton>
+      </View>
+    );
+  };
+
+  const renderStep4 = () => (
+    <View className="flex-1 items-center justify-center py-8">
+      {/* Success Icon */}
+      <View className="w-20 h-20 rounded-full bg-accent-500 items-center justify-center mb-6">
+        <CheckCircle size={40} color="white" />
+      </View>
+
+      {/* Title & Subtitle */}
+      <Text className="text-gray-900 dark:text-white text-xl font-bold text-center mb-2">
+        Withdrawal Submitted
+      </Text>
+      <Text className="text-gray-500 dark:text-gray-400 text-sm text-center mb-6">
+        We'll notify you when it completes.
+      </Text>
+
+      {/* Amount */}
+      <Text className="text-gray-900 dark:text-white text-4xl font-bold mb-2">
+        ${receiveAmount.toFixed(2)}
+      </Text>
+
+      {/* Destination */}
+      <Text className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+        To {selectedAccount?.label || "External Wallet"} (
+        {truncateAddress(
+          selectedAccount?.walletAddress || destinationAddress
+        )}
+        )
+      </Text>
+
+      {/* Processing Badge */}
+      <View className="bg-amber-100 dark:bg-amber-900/30 px-4 py-2 rounded-full mb-8">
+        <Text className="text-amber-700 dark:text-amber-400 text-sm font-medium">
+          Processing
+        </Text>
+      </View>
+
+      {/* Action Buttons */}
+      <View className="w-full gap-3">
+        <ThemeButton
+          variant="secondary"
+          onPress={() => {
+            handleClose();
+            router.push("/activity");
+          }}
+        >
+          View in Activity
+        </ThemeButton>
+        <ThemeButton variant="primary" onPress={handleClose}>
+          Done
+        </ThemeButton>
+      </View>
+    </View>
+  );
+
+  const renderStepContent = () => {
+    switch (step) {
+      case 1:
+        return renderStep1();
+      case 2:
+        return renderStep2();
+      case 3:
+        return renderStep3();
+      case 4:
+        return renderStep4();
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <Modal
@@ -437,466 +912,7 @@ export default function WithdrawModal({
           )}
 
           <ScrollView className="flex-1 px-6">
-            {/* Step 1: Select Destination */}
-            {step === 1 && (
-              <View>
-                {/* Crypto Selection */}
-                <Text className="text-gray-900 dark:text-white font-semibold text-base mb-3">
-                  Select Crypto
-                </Text>
-                <View className="flex-row gap-3 mb-6">
-                  <Pressable
-                    onPress={() => setSelectedCrypto("USDC")}
-                    className={`flex-1 p-4 rounded-xl border-2 ${
-                      selectedCrypto === "USDC"
-                        ? "border-primary bg-primary/5"
-                        : "border-gray-200 dark:border-gray-700"
-                    }`}
-                  >
-                    <View className="flex-row items-center">
-                      <View
-                        className={`w-5 h-5 rounded-full border-2 mr-3 items-center justify-center ${
-                          selectedCrypto === "USDC"
-                            ? "border-primary"
-                            : "border-gray-300 dark:border-gray-600"
-                        }`}
-                      >
-                        {selectedCrypto === "USDC" && (
-                          <View className="w-3 h-3 rounded-full bg-primary" />
-                        )}
-                      </View>
-                      <Text className="text-gray-900 dark:text-white font-medium">
-                        USDC
-                      </Text>
-                    </View>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => setSelectedCrypto("USDT")}
-                    className={`flex-1 p-4 rounded-xl border-2 ${
-                      selectedCrypto === "USDT"
-                        ? "border-primary bg-primary/5"
-                        : "border-gray-200 dark:border-gray-700"
-                    }`}
-                  >
-                    <View className="flex-row items-center">
-                      <View
-                        className={`w-5 h-5 rounded-full border-2 mr-3 items-center justify-center ${
-                          selectedCrypto === "USDT"
-                            ? "border-primary"
-                            : "border-gray-300 dark:border-gray-600"
-                        }`}
-                      >
-                        {selectedCrypto === "USDT" && (
-                          <View className="w-3 h-3 rounded-full bg-primary" />
-                        )}
-                      </View>
-                      <Text className="text-gray-900 dark:text-white font-medium">
-                        USDT
-                      </Text>
-                    </View>
-                  </Pressable>
-                </View>
-
-                {/* Network (Locked) */}
-                <Text className="text-gray-900 dark:text-white font-semibold text-base mb-3">
-                  Network
-                </Text>
-                <View className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 mb-6 flex-row items-center justify-between">
-                  <Text className="text-gray-900 dark:text-white font-medium">
-                    Solana
-                  </Text>
-                  <Lock size={18} color="#6B7280" />
-                </View>
-
-                {/* Destination Selection */}
-                <Text className="text-gray-900 dark:text-white font-semibold text-base mb-3">
-                  Destination
-                </Text>
-
-                {isLoadingAccounts ? (
-                  <View className="items-center py-8">
-                    <ActivityIndicator size="large" color="#6366F1" />
-                  </View>
-                ) : (
-                  <View className="mb-4">
-                    {/* Existing Accounts */}
-                    {withdrawalAccounts.map((account) => (
-                      <Pressable
-                        key={account.id}
-                        onPress={() => handleSelectAccount(account)}
-                        className={`p-4 rounded-xl border-2 mb-3 ${
-                          selectedAccountId === account.id && !isAddingNew
-                            ? "border-primary bg-primary/5"
-                            : "border-gray-200 dark:border-gray-700"
-                        }`}
-                      >
-                        <View className="flex-row items-center">
-                          <View
-                            className={`w-5 h-5 rounded-full border-2 mr-3 items-center justify-center ${
-                              selectedAccountId === account.id && !isAddingNew
-                                ? "border-primary"
-                                : "border-gray-300 dark:border-gray-600"
-                            }`}
-                          >
-                            {selectedAccountId === account.id &&
-                              !isAddingNew && (
-                                <View className="w-3 h-3 rounded-full bg-primary" />
-                              )}
-                          </View>
-                          <View className="flex-1">
-                            <Text className="text-gray-900 dark:text-white font-medium">
-                              {account.label || "External Wallet"}
-                            </Text>
-                            <Text className="text-gray-500 dark:text-gray-400 text-sm font-mono">
-                              {truncateAddress(account.walletAddress)}
-                            </Text>
-                          </View>
-                          <Wallet size={20} color="#6B7280" />
-                        </View>
-                      </Pressable>
-                    ))}
-
-                    {/* Add New Account Option */}
-                    <Pressable
-                      onPress={handleAddNewToggle}
-                      className={`p-4 rounded-xl border-2 border-dashed ${
-                        isAddingNew
-                          ? "border-primary bg-primary/5"
-                          : "border-gray-300 dark:border-gray-600"
-                      }`}
-                    >
-                      <View className="flex-row items-center justify-center">
-                        <Plus size={20} color={isAddingNew ? "#6366F1" : "#6B7280"} />
-                        <Text
-                          className={`ml-2 font-medium ${
-                            isAddingNew
-                              ? "text-primary"
-                              : "text-gray-500 dark:text-gray-400"
-                          }`}
-                        >
-                          Add New Address
-                        </Text>
-                      </View>
-                    </Pressable>
-                  </View>
-                )}
-
-                {/* New Account Form */}
-                {isAddingNew && (
-                  <View className="mt-4">
-                    {/* Label */}
-                    <Text className="text-gray-900 dark:text-white font-semibold text-base mb-3">
-                      Label (Optional)
-                    </Text>
-                    <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 mb-4">
-                      <TextInput
-                        value={label}
-                        onChangeText={(text) => setLabel(sanitizeLabel(text))}
-                        placeholder="e.g., My Binance Wallet"
-                        placeholderTextColor="#9CA3AF"
-                        className="text-gray-900 dark:text-white text-base"
-                        maxLength={100}
-                      />
-                    </View>
-
-                    {/* Destination Address */}
-                    <Text className="text-gray-900 dark:text-white font-semibold text-base mb-3">
-                      Destination Address
-                    </Text>
-                    <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 flex-row items-center mb-4">
-                      <TextInput
-                        value={destinationAddress}
-                        onChangeText={setDestinationAddress}
-                        placeholder="Enter Solana address..."
-                        placeholderTextColor="#9CA3AF"
-                        className="flex-1 text-gray-900 dark:text-white text-base"
-                      />
-                      <Pressable onPress={pasteAddress} className="p-2">
-                        <ClipboardPaste size={20} color="#6B7280" />
-                      </Pressable>
-                      <Pressable
-                        onPress={() => setShowScanner(true)}
-                        className="p-2"
-                      >
-                        <ScanLine size={20} color="#6B7280" />
-                      </Pressable>
-                    </View>
-                  </View>
-                )}
-
-                {/* Warning */}
-                <View className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6">
-                  <View className="flex-row items-start">
-                    <AlertTriangle size={18} color="#F59E0B" />
-                    <Text className="text-amber-700 dark:text-amber-300 text-sm ml-2 flex-1">
-                      Withdrawals are irreversible. Double-check the address
-                      matches the Solana network.
-                    </Text>
-                  </View>
-                </View>
-
-                <ThemeButton
-                  variant="primary"
-                  onPress={handleStep1Continue}
-                  disabled={
-                    isProcessing ||
-                    (!isAddingNew && !selectedAccountId) ||
-                    (isAddingNew && !destinationAddress.trim())
-                  }
-                >
-                  {isProcessing ? (
-                    <ActivityIndicator size="small" color="white" />
-                  ) : (
-                    "Continue"
-                  )}
-                </ThemeButton>
-              </View>
-            )}
-
-            {/* Step 2: Withdraw Amount */}
-            {step === 2 && (
-              <View>
-                {/* Available Balance */}
-                <View className="mb-6">
-                  <Text className="text-gray-500 dark:text-gray-400 text-sm mb-1">
-                    Available Balance
-                  </Text>
-                  <Text className="text-gray-900 dark:text-white text-2xl font-bold">
-                    ${availableBalance.toFixed(2)} {selectedCrypto}
-                  </Text>
-                </View>
-
-                {/* Amount Input */}
-                <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5 mb-4 items-center">
-                  <Text className="text-gray-500 dark:text-gray-400 text-sm mb-2">
-                    Enter Amount
-                  </Text>
-                  <View className="flex-row items-center">
-                    <Text className="text-gray-900 dark:text-white text-3xl font-bold">
-                      $
-                    </Text>
-                    <TextInput
-                      value={withdrawAmount}
-                      onChangeText={(text) => setWithdrawAmount(sanitizeAmount(text))}
-                      placeholder="0.00"
-                      placeholderTextColor="#9CA3AF"
-                      keyboardType="decimal-pad"
-                      className="text-gray-900 dark:text-white text-3xl font-bold text-center min-w-[100px]"
-                      maxLength={15}
-                    />
-                  </View>
-                </View>
-
-                {/* Quick Amount Buttons */}
-                <View className="flex-row gap-3 mb-6">
-                  <Pressable
-                    onPress={() => setQuickAmount(25)}
-                    className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-gray-800"
-                  >
-                    <Text className="text-center text-gray-900 dark:text-white font-medium">
-                      25%
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => setQuickAmount(50)}
-                    className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-gray-800"
-                  >
-                    <Text className="text-center text-gray-900 dark:text-white font-medium">
-                      50%
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => setQuickAmount(100)}
-                    className="flex-1 py-3 rounded-xl bg-gray-100 dark:bg-gray-800"
-                  >
-                    <Text className="text-center text-gray-900 dark:text-white font-medium">
-                      Max
-                    </Text>
-                  </Pressable>
-                </View>
-
-                {/* Destination Info */}
-                <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-6">
-                  <View className="flex-row justify-between mb-2">
-                    <Text className="text-gray-500 dark:text-gray-400 text-sm">
-                      Sending to
-                    </Text>
-                    <Text className="text-gray-900 dark:text-white font-medium">
-                      {selectedAccount?.label || "External Wallet"}
-                    </Text>
-                  </View>
-                  <View className="flex-row justify-between">
-                    <Text className="text-gray-500 dark:text-gray-400 text-sm">
-                      Address
-                    </Text>
-                    <Text className="text-gray-900 dark:text-white font-medium font-mono">
-                      {truncateAddress(
-                        selectedAccount?.walletAddress || destinationAddress
-                      )}
-                    </Text>
-                  </View>
-                </View>
-
-                <ThemeButton
-                  variant="primary"
-                  onPress={handleStep2Continue}
-                  disabled={
-                    isProcessing ||
-                    !withdrawAmount ||
-                    parseFloat(withdrawAmount) <= 0 ||
-                    parseFloat(withdrawAmount) > availableBalance
-                  }
-                >
-                  {isProcessing ? (
-                    <ActivityIndicator size="small" color="white" />
-                  ) : (
-                    "Continue"
-                  )}
-                </ThemeButton>
-              </View>
-            )}
-
-            {/* Step 3: Confirmation */}
-            {step === 3 && simulationData && (
-              <View>
-                <Text className="text-gray-900 dark:text-white font-semibold text-lg mb-4">
-                  Review Withdrawal
-                </Text>
-
-                {/* Summary Card */}
-                <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5 mb-6">
-                  <View className="flex-row justify-between mb-4">
-                    <Text className="text-gray-500 dark:text-gray-400 text-sm">
-                      Crypto
-                    </Text>
-                    <Text className="text-gray-900 dark:text-white font-medium">
-                      {selectedCrypto}
-                    </Text>
-                  </View>
-                  <View className="flex-row justify-between mb-4">
-                    <Text className="text-gray-500 dark:text-gray-400 text-sm">
-                      Network
-                    </Text>
-                    <Text className="text-gray-900 dark:text-white font-medium">
-                      Solana
-                    </Text>
-                  </View>
-                  {(selectedAccount?.label || label) && (
-                    <View className="flex-row justify-between mb-4">
-                      <Text className="text-gray-500 dark:text-gray-400 text-sm">
-                        Label
-                      </Text>
-                      <Text className="text-gray-900 dark:text-white font-medium">
-                        {selectedAccount?.label || label}
-                      </Text>
-                    </View>
-                  )}
-                  <View className="flex-row justify-between mb-4">
-                    <Text className="text-gray-500 dark:text-gray-400 text-sm">
-                      To Address
-                    </Text>
-                    <Text className="text-gray-900 dark:text-white font-medium font-mono">
-                      {truncateAddress(
-                        selectedAccount?.walletAddress || destinationAddress
-                      )}
-                    </Text>
-                  </View>
-                  <View className="flex-row justify-between mb-4">
-                    <Text className="text-gray-500 dark:text-gray-400 text-sm">
-                      Amount
-                    </Text>
-                    <Text className="text-gray-900 dark:text-white font-medium">
-                      ${sendAmount.toFixed(2)} {simulationData.quote.inAmount.currency}
-                    </Text>
-                  </View>
-                  <View className="flex-row justify-between mb-4">
-                    <Text className="text-gray-500 dark:text-gray-400 text-sm">
-                      Fees
-                    </Text>
-                    <Text className="text-gray-900 dark:text-white font-medium">
-                      ${totalFees.toFixed(2)} {simulationData.quote.fees.totalFees.currency}
-                    </Text>
-                  </View>
-                  <View className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <View className="flex-row justify-between">
-                      <Text className="text-gray-900 dark:text-white font-semibold">
-                        You'll Receive
-                      </Text>
-                      <Text className="text-primary font-bold text-lg">
-                        ${receiveAmount.toFixed(2)} {simulationData.quote.outAmount.currency}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-
-                <ThemeButton
-                  variant="primary"
-                  onPress={handleConfirmWithdraw}
-                  disabled={isProcessing}
-                >
-                  {isProcessing ? (
-                    <ActivityIndicator size="small" color="white" />
-                  ) : (
-                    "Confirm Withdraw"
-                  )}
-                </ThemeButton>
-              </View>
-            )}
-
-            {/* Step 4: Success Screen */}
-            {step === 4 && (
-              <View className="flex-1 items-center justify-center py-8">
-                {/* Success Icon */}
-                <View className="w-20 h-20 rounded-full bg-accent-500 items-center justify-center mb-6">
-                  <CheckCircle size={40} color="white" />
-                </View>
-
-                {/* Title & Subtitle */}
-                <Text className="text-gray-900 dark:text-white text-xl font-bold text-center mb-2">
-                  Withdrawal Submitted
-                </Text>
-                <Text className="text-gray-500 dark:text-gray-400 text-sm text-center mb-6">
-                  We'll notify you when it completes.
-                </Text>
-
-                {/* Amount */}
-                <Text className="text-gray-900 dark:text-white text-4xl font-bold mb-2">
-                  ${receiveAmount.toFixed(2)}
-                </Text>
-
-                {/* Destination */}
-                <Text className="text-gray-500 dark:text-gray-400 text-sm mb-4">
-                  To {selectedAccount?.label || "External Wallet"} (
-                  {truncateAddress(
-                    selectedAccount?.walletAddress || destinationAddress
-                  )}
-                  )
-                </Text>
-
-                {/* Processing Badge */}
-                <View className="bg-amber-100 dark:bg-amber-900/30 px-4 py-2 rounded-full mb-8">
-                  <Text className="text-amber-700 dark:text-amber-400 text-sm font-medium">
-                    Processing
-                  </Text>
-                </View>
-
-                {/* Action Buttons */}
-                <View className="w-full gap-3">
-                  <ThemeButton
-                    variant="secondary"
-                    onPress={() => {
-                      handleClose();
-                      router.push("/activity");
-                    }}
-                  >
-                    View in Activity
-                  </ThemeButton>
-                  <ThemeButton variant="primary" onPress={handleClose}>
-                    Done
-                  </ThemeButton>
-                </View>
-              </View>
-            )}
+            {renderStepContent()}
           </ScrollView>
         </View>
       </Modal>
