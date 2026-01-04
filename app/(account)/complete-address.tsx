@@ -1,9 +1,11 @@
 import SignOutButton from "@/components/SignOutButton";
 import CountrySelector from "@/components/ui/CountrySelector";
+import FormErrorMessage from "@/components/ui/FormErrorMessage";
 import ThemeButton from "@/components/ui/ThemeButton";
 import ThemeTextInput from "@/components/ui/ThemeTextInput";
 import { useTheme } from "@/context/ThemeContext";
 import useCurrentUser from "@/hooks/useCurrentUser";
+import useKeyboardHeight from "@/hooks/useKeyboardHeight";
 import apiClient from "@/lib/api-client";
 import { getUserFriendlyErrorMessage, logError } from "@/lib/error-handler";
 import { AddressFormData, addressSchema } from "@/schemas";
@@ -12,14 +14,7 @@ import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import * as React from "react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Keyboard,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CompleteAddressScreen() {
@@ -27,29 +22,10 @@ export default function CompleteAddressScreen() {
   const { isDark } = useTheme();
   const { data: currentUserResponse } = useCurrentUser();
   const currentUser = currentUserResponse?.data;
+  const keyboardHeight = useKeyboardHeight();
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [serverError, setServerError] = React.useState("");
-  const [keyboardHeight, setKeyboardHeight] = React.useState(0);
-
-  React.useEffect(() => {
-    const showEvent =
-      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    const hideEvent =
-      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
-
-    const showSubscription = Keyboard.addListener(showEvent, (e) => {
-      setKeyboardHeight(e.endCoordinates.height);
-    });
-    const hideSubscription = Keyboard.addListener(hideEvent, () => {
-      setKeyboardHeight(0);
-    });
-
-    return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
-    };
-  }, []);
 
   const {
     control,
@@ -141,13 +117,7 @@ export default function CompleteAddressScreen() {
           </View>
 
           {/* Server Error Message */}
-          {serverError ? (
-            <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
-              <Text className="text-red-600 dark:text-red-400 text-sm">
-                {serverError}
-              </Text>
-            </View>
-          ) : null}
+          <FormErrorMessage message={serverError} />
 
           {/* Form Fields */}
           <View className="mb-4">

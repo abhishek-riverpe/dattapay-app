@@ -1,7 +1,7 @@
 import { useSSO } from "@clerk/clerk-expo";
-import { useRouter } from "expo-router";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 import ThemeButton from "@/components/ui/ThemeButton";
+import useSocialAuth from "@/hooks/useSocialAuth";
 import Svg, { Path } from "react-native-svg";
 
 interface GoogleSignInButtonProps {
@@ -33,38 +33,21 @@ function GoogleIcon() {
 
 export default function GoogleSignInButton({
   onSignInComplete,
-}: GoogleSignInButtonProps) {
+}: Readonly<GoogleSignInButtonProps>) {
   const { startSSOFlow } = useSSO();
-  const router = useRouter();
+  const { handleAuthResult, handleAuthError } = useSocialAuth({
+    onSignInComplete,
+    providerName: "Google",
+  });
 
   const handleGoogleSignIn = async () => {
     try {
-      const { createdSessionId, setActive } = await startSSOFlow({
+      const result = await startSSOFlow({
         strategy: "oauth_google",
       });
-
-      if (createdSessionId && setActive) {
-        await setActive({ session: createdSessionId });
-
-        if (onSignInComplete) {
-          onSignInComplete();
-        } else {
-          router.replace("/(account)/complete-account");
-        }
-      }
+      await handleAuthResult(result);
     } catch (err) {
-      const error = err as { code?: string; message?: string };
-      if (error.code === "ERR_REQUEST_CANCELED") {
-        return;
-      }
-
-      Alert.alert(
-        "Error",
-        error.message || "An error occurred during Google Sign-In"
-      );
-      if (__DEV__) {
-        console.error("Google Sign-In error:", error.message || "Unknown error");
-      }
+      handleAuthError(err);
     }
   };
 

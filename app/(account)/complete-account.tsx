@@ -2,9 +2,11 @@ import ThemeButton from "@/components/ui/ThemeButton";
 import ThemeTextInput from "@/components/ui/ThemeTextInput";
 import CountryPicker from "@/components/ui/CountryPicker";
 import DatePicker from "@/components/ui/DatePicker";
+import FormErrorMessage from "@/components/ui/FormErrorMessage";
 import { Mail, Globe } from "lucide-react-native";
 import SignOutButton from "@/components/SignOutButton";
 import useCurrentUser from "@/hooks/useCurrentUser";
+import useKeyboardHeight from "@/hooks/useKeyboardHeight";
 import apiClient from "@/lib/api-client";
 import {
   generateAndStoreKeys,
@@ -19,7 +21,7 @@ import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
 import * as React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Keyboard, Platform, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CompleteAccountScreen() {
@@ -27,29 +29,10 @@ export default function CompleteAccountScreen() {
   const { user } = useUser();
   const { data: currentUserResponse } = useCurrentUser();
   const currentUser = currentUserResponse?.data;
+  const keyboardHeight = useKeyboardHeight();
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [serverError, setServerError] = React.useState("");
-  const [keyboardHeight, setKeyboardHeight] = React.useState(0);
-
-  React.useEffect(() => {
-    const showEvent =
-      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    const hideEvent =
-      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
-
-    const showSubscription = Keyboard.addListener(showEvent, (e) => {
-      setKeyboardHeight(e.endCoordinates.height);
-    });
-    const hideSubscription = Keyboard.addListener(hideEvent, () => {
-      setKeyboardHeight(0);
-    });
-
-    return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
-    };
-  }, []);
 
   const {
     control,
@@ -165,13 +148,7 @@ export default function CompleteAccountScreen() {
           </View>
 
           {/* Server Error Message */}
-          {serverError ? (
-            <View className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
-              <Text className="text-red-600 dark:text-red-400 text-sm">
-                {serverError}
-              </Text>
-            </View>
-          ) : null}
+          <FormErrorMessage message={serverError} />
 
           {/* Form Fields */}
           {/* Row 1: First Name & Last Name */}

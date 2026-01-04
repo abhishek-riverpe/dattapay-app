@@ -1,7 +1,7 @@
 import { useSignInWithApple } from "@clerk/clerk-expo";
-import { useRouter } from "expo-router";
-import { Alert, Platform, Text, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import ThemeButton from "@/components/ui/ThemeButton";
+import useSocialAuth from "@/hooks/useSocialAuth";
 
 interface AppleSignInButtonProps {
   onSignInComplete?: () => void;
@@ -11,9 +11,12 @@ interface AppleSignInButtonProps {
 export default function AppleSignInButton({
   onSignInComplete,
   showDivider = true,
-}: AppleSignInButtonProps) {
+}: Readonly<AppleSignInButtonProps>) {
   const { startAppleAuthenticationFlow } = useSignInWithApple();
-  const router = useRouter();
+  const { handleAuthResult, handleAuthError } = useSocialAuth({
+    onSignInComplete,
+    providerName: "Apple",
+  });
 
   if (Platform.OS !== "ios") {
     return null;
@@ -21,31 +24,10 @@ export default function AppleSignInButton({
 
   const handleAppleSignIn = async () => {
     try {
-      const { createdSessionId, setActive } =
-        await startAppleAuthenticationFlow();
-
-      if (createdSessionId && setActive) {
-        await setActive({ session: createdSessionId });
-
-        if (onSignInComplete) {
-          onSignInComplete();
-        } else {
-          router.replace("/(account)/complete-account");
-        }
-      }
+      const result = await startAppleAuthenticationFlow();
+      await handleAuthResult(result);
     } catch (err) {
-      const error = err as { code?: string; message?: string };
-      if (error.code === "ERR_REQUEST_CANCELED") {
-        return;
-      }
-
-      Alert.alert(
-        "Error",
-        error.message || "An error occurred during Apple Sign-In"
-      );
-      if (__DEV__) {
-        console.error("Apple Sign-In error:", error.message || "Unknown error");
-      }
+      handleAuthError(err);
     }
   };
 
