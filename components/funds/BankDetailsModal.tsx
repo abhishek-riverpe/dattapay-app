@@ -29,7 +29,7 @@ interface DetailFieldProps {
   showRequired?: boolean;
 }
 
-function DetailField({ label, value, fieldKey, copiedField, onCopy, isMonospace, showRequired }: DetailFieldProps) {
+function DetailField({ label, value, fieldKey, copiedField, onCopy, isMonospace, showRequired }: Readonly<DetailFieldProps>) {
   const isCopied = copiedField === fieldKey;
   const textStyle = isMonospace
     ? "text-gray-900 dark:text-white text-base font-medium font-mono"
@@ -64,7 +64,7 @@ function DetailField({ label, value, fieldKey, copiedField, onCopy, isMonospace,
 export default function BankDetailsModal({
   visible,
   onClose,
-}: BankDetailsModalProps) {
+}: Readonly<BankDetailsModalProps>) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [bankDetails, setBankDetails] = useState<BankDetails | null>(null);
   const [isLoading, setIsLoading] = useState(false);

@@ -50,7 +50,7 @@ export default function WithdrawModal({
   visible,
   onClose,
   availableBalance,
-}: WithdrawModalProps) {
+}: Readonly<WithdrawModalProps>) {
   const router = useRouter();
   const { authenticate } = useBiometricAuth();
 

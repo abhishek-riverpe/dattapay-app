@@ -14,7 +14,7 @@ export default function ActivityDetailsModal({
   activity,
   visible,
   onClose,
-}: ActivityDetailsModalProps) {
+}: Readonly<ActivityDetailsModalProps>) {
   const [copied, setCopied] = useState(false);
 
   const copyTxHash = async (hash: string) => {

@@ -43,6 +43,7 @@ export async function checkAccountStatus(clerkUserId: string): Promise<{
     return response.data;
   } catch (error: unknown) {
     // If user doesn't exist or error, assume account not completed
+    console.warn("Failed to check account status:", error instanceof Error ? error.message : "Unknown error");
     return {
       accountCompleted: false,
       kycCompleted: false,

@@ -14,7 +14,7 @@ export default function QRScannerModal({
   visible,
   onClose,
   onScan,
-}: QRScannerModalProps) {
+}: Readonly<QRScannerModalProps>) {
   const [permission, requestPermission] = useCameraPermissions();
 
   const handleScan = (data: string) => {

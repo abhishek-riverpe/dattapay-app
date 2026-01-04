@@ -15,10 +15,10 @@ export function sanitizeLabel(input: string): string {
   let sanitized = input.length > 1000 ? input.substring(0, 1000) : input;
 
   // Remove any HTML/script tags (bounded quantifier to prevent ReDoS)
-  sanitized = sanitized.replace(/<[^>]{0,500}>/g, "");
+  sanitized = sanitized.replaceAll(/<[^>]{0,500}>/g, "");
 
   // Remove potential SQL injection characters
-  sanitized = sanitized.replace(/[;'"\\]/g, "");
+  sanitized = sanitized.replaceAll(/[;'"\\]/g, "");
 
   // Trim whitespace and limit length
   sanitized = sanitized.trim().substring(0, 100);
@@ -35,7 +35,7 @@ export function sanitizeAmount(input: string): string {
   }
 
   // Only allow digits and one decimal point
-  const sanitized = input.replace(/[^0-9.]/g, "");
+  const sanitized = input.replaceAll(/[^0-9.]/g, "");
 
   // Ensure only one decimal point
   const parts = sanitized.split(".");
@@ -64,7 +64,7 @@ export function sanitizeText(input: string, maxLength: number = 500): string {
   let sanitized = input.length > maxLength * 2 ? input.substring(0, maxLength * 2) : input;
 
   // Remove any HTML/script tags (bounded quantifier to prevent ReDoS)
-  sanitized = sanitized.replace(/<[^>]{0,500}>/g, "");
+  sanitized = sanitized.replaceAll(/<[^>]{0,500}>/g, "");
 
   // Trim and limit length
   return sanitized.trim().substring(0, maxLength);

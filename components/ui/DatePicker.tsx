@@ -24,7 +24,7 @@ export default function DatePicker({
   placeholder = "Select date",
   maximumDate,
   minimumDate,
-}: DatePickerProps) {
+}: Readonly<DatePickerProps>) {
   const { isDark } = useTheme();
   const [showPicker, setShowPicker] = useState(false);
 

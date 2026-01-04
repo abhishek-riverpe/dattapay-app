@@ -3,13 +3,13 @@ import CryptoJS from "crypto-js";
 const base64UrlEncode = (wordArray: CryptoJS.lib.WordArray): string => {
   return wordArray
     .toString(CryptoJS.enc.Base64)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
     .replace(/={1,2}$/, "");
 };
 
 const base64UrlEncodeString = (str: string): string => {
-  return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/={1,2}$/g, "");
+  return btoa(str).replaceAll("+", "-").replaceAll("/", "_").replace(/={1,2}$/, "");
 };
 
 // Token expires in 1 hour

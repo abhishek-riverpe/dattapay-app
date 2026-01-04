@@ -1,6 +1,6 @@
 import { TextInput, View, Text, Pressable } from "react-native";
 import { useTheme } from "@/context/ThemeContext";
-import { Eye, EyeOff, Mail } from "lucide-react-native";
+import { Eye, EyeOff } from "lucide-react-native";
 import { useState } from "react";
 import type { LucideIcon } from "lucide-react-native";
 

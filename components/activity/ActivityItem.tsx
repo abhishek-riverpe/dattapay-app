@@ -12,7 +12,7 @@ export default function ActivityItem({
   activity,
   onPress,
   isLast,
-}: ActivityItemProps) {
+}: Readonly<ActivityItemProps>) {
   const statusColors = getStatusColor(activity.status);
   const isWithdraw = activity.type === "withdraw";
 
@@ -20,7 +20,7 @@ export default function ActivityItem({
     <Pressable
       onPress={onPress}
       className={`flex-row items-center p-4 ${
-        !isLast ? "border-b border-gray-100 dark:border-gray-800" : ""
+        isLast ? "" : "border-b border-gray-100 dark:border-gray-800"
       }`}
     >
       {/* Icon */}
