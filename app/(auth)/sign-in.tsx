@@ -73,7 +73,7 @@ export default function SignInScreen() {
         });
 
         if (signInAttempt.status === "complete") {
-          await refreshAdminToken();
+          refreshAdminToken();
           await setActive({
             session: signInAttempt.createdSessionId,
             navigate: async ({ session }) => {
@@ -125,7 +125,7 @@ export default function SignInScreen() {
         });
 
         if (signInAttempt.status === "complete") {
-          await refreshAdminToken();
+          refreshAdminToken();
           await setActive({
             session: signInAttempt.createdSessionId,
             navigate: async ({ session }) => {

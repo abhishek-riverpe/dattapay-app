@@ -216,10 +216,36 @@ export default function BiometricLock({ children }: BiometricLockProps) {
     }
   };
 
+  const handleAuthResult = async (result: LocalAuthentication.LocalAuthenticationResult) => {
+    if (result.success) {
+      setIsAuthenticated(true);
+      await resetLockoutState();
+      return;
+    }
+
+    if (result.error === "user_fallback") {
+      setError(null);
+      return;
+    }
+
+    if (result.error === "not_enrolled") {
+      setSecurityAvailable(false);
+      setError("Please set up biometric authentication or a device passcode to use DattaPay.");
+      return;
+    }
+
+    await handleFailedAttempt();
+    if (!lockoutUntil) {
+      const message = result.error === "user_cancel"
+        ? "Authentication cancelled"
+        : "Authentication failed. Please try again.";
+      setError(message);
+    }
+  };
+
   const authenticate = async () => {
     if (isAuthenticating) return;
 
-    // Check if currently locked out
     if (lockoutUntil && lockoutUntil > Date.now()) {
       setError(`Please wait ${remainingTime} before trying again.`);
       return;
@@ -232,7 +258,6 @@ export default function BiometricLock({ children }: BiometricLockProps) {
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
       const securityLevel = await LocalAuthentication.getEnrolledLevelAsync();
 
-      // Do NOT auto-bypass - require device security
       if (!hasHardware && securityLevel === LocalAuthentication.SecurityLevel.NONE) {
         setSecurityAvailable(false);
         setError("Device security is required. Please set up a passcode or biometric authentication in your device settings.");
@@ -247,25 +272,7 @@ export default function BiometricLock({ children }: BiometricLockProps) {
         disableDeviceFallback: false,
       });
 
-      if (result.success) {
-        setIsAuthenticated(true);
-        await resetLockoutState();
-      } else if (result.error === "user_cancel") {
-        await handleFailedAttempt();
-        if (!lockoutUntil) {
-          setError("Authentication cancelled");
-        }
-      } else if (result.error === "user_fallback") {
-        setError(null);
-      } else if (result.error === "not_enrolled") {
-        setSecurityAvailable(false);
-        setError("Please set up biometric authentication or a device passcode to use DattaPay.");
-      } else {
-        await handleFailedAttempt();
-        if (!lockoutUntil) {
-          setError("Authentication failed. Please try again.");
-        }
-      }
+      await handleAuthResult(result);
     } catch {
       await handleFailedAttempt();
       if (!lockoutUntil) {

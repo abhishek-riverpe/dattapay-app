@@ -158,69 +158,27 @@ export default function WithdrawModal({
     setSelectedAccount(null);
   };
 
+  const validateNewAddress = (): { error: string | null; sanitizedAddress: string | null } => {
+    if (!destinationAddress.trim()) {
+      return { error: "Please enter a destination address", sanitizedAddress: null };
+    }
+
+    const validationError = validateSolanaAddress(destinationAddress);
+    if (validationError) {
+      return { error: validationError, sanitizedAddress: null };
+    }
+
+    const sanitized = sanitizeSolanaAddress(destinationAddress);
+    if (!sanitized) {
+      return { error: "Please enter a valid Solana address", sanitizedAddress: null };
+    }
+
+    return { error: null, sanitizedAddress: sanitized };
+  };
+
   // Step 1 -> Step 2: Create account if new, then proceed
   const handleStep1Continue = async () => {
-    if (isAddingNew) {
-      if (!destinationAddress.trim()) {
-        Toast.show({
-          type: "error",
-          text1: "Error",
-          text2: "Please enter a destination address",
-        });
-        return;
-      }
-
-      // Validate Solana address format
-      const validationError = validateSolanaAddress(destinationAddress);
-      if (validationError) {
-        Toast.show({
-          type: "error",
-          text1: "Invalid Address",
-          text2: validationError,
-        });
-        return;
-      }
-
-      const sanitizedAddress = sanitizeSolanaAddress(destinationAddress);
-      if (!sanitizedAddress) {
-        Toast.show({
-          type: "error",
-          text1: "Invalid Address",
-          text2: "Please enter a valid Solana address",
-        });
-        return;
-      }
-
-      setIsProcessing(true);
-      try {
-        const result = await createExternalAccount.mutateAsync({
-          walletAddress: sanitizedAddress,
-          label: label.trim() || undefined,
-        });
-
-        if (result.success) {
-          setSelectedAccountId(result.data.id);
-          setSelectedAccount(result.data);
-          setStep(2);
-        } else {
-          Toast.show({
-            type: "error",
-            text1: "Error",
-            text2: result.message || "Failed to create external account",
-          });
-        }
-      } catch (error: unknown) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Failed to add account";
-        Toast.show({
-          type: "error",
-          text1: "Error",
-          text2: errorMessage,
-        });
-      } finally {
-        setIsProcessing(false);
-      }
-    } else {
+    if (!isAddingNew) {
       if (!selectedAccountId) {
         Toast.show({
           type: "error",
@@ -230,6 +188,47 @@ export default function WithdrawModal({
         return;
       }
       setStep(2);
+      return;
+    }
+
+    const { error, sanitizedAddress } = validateNewAddress();
+    if (error || !sanitizedAddress) {
+      Toast.show({
+        type: "error",
+        text1: "Invalid Address",
+        text2: error || "Please enter a valid Solana address",
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const result = await createExternalAccount.mutateAsync({
+        walletAddress: sanitizedAddress,
+        label: label.trim() || undefined,
+      });
+
+      if (result.success) {
+        setSelectedAccountId(result.data.id);
+        setSelectedAccount(result.data);
+        setStep(2);
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: result.message || "Failed to create external account",
+        });
+      }
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to add account";
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: errorMessage,
+      });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -277,56 +276,59 @@ export default function WithdrawModal({
     }
   };
 
+  const prepareWithdrawalSignature = async (): Promise<string | null> => {
+    const authResult = await authenticate("Authorize withdrawal");
+    if (!authResult.success) {
+      Toast.show({
+        type: "error",
+        text1: "Authentication Failed",
+        text2: authResult.error || "Please try again",
+      });
+      return null;
+    }
+
+    const publicKey = await getPublicKey();
+    const privateKey = await getPrivateKey();
+
+    if (!publicKey || !privateKey) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Security keys not found. Please re-authenticate.",
+      });
+      return null;
+    }
+
+    const signature = await generateSignature({
+      payload: simulationData!.payloadToSign,
+      publicKey,
+      privateKey,
+    });
+
+    if (!signature) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Failed to sign transaction",
+      });
+      return null;
+    }
+
+    return signature;
+  };
+
   // Step 3: Confirm - Biometric auth, sign, execute
   const handleConfirmWithdraw = async () => {
     if (!simulationData) return;
 
     setIsProcessing(true);
     try {
-      // 1. Biometric authentication
-      const authResult = await authenticate("Authorize withdrawal");
-      if (!authResult.success) {
-        Toast.show({
-          type: "error",
-          text1: "Authentication Failed",
-          text2: authResult.error || "Please try again",
-        });
-        setIsProcessing(false);
-        return;
-      }
-
-      // 2. Get keys from secure storage
-      const publicKey = await getPublicKey();
-      const privateKey = await getPrivateKey();
-
-      if (!publicKey || !privateKey) {
-        Toast.show({
-          type: "error",
-          text1: "Error",
-          text2: "Security keys not found. Please re-authenticate.",
-        });
-        setIsProcessing(false);
-        return;
-      }
-
-      // 3. Sign the payload
-      const signature = await generateSignature({
-        payload: simulationData.payloadToSign,
-        publicKey,
-        privateKey,
-      });
-
+      const signature = await prepareWithdrawalSignature();
       if (!signature) {
-        Toast.show({
-          type: "error",
-          text1: "Error",
-          text2: "Failed to sign transaction",
-        });
         setIsProcessing(false);
         return;
       }
 
-      // 4. Execute transfer
       const result = await executeTransfer.mutateAsync({
         executionId: simulationData.executionId,
         signature,

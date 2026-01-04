@@ -103,48 +103,37 @@ export default function CompleteAccountScreen() {
     }
   }, [currentUser, user, reset]);
 
+  const getOrGeneratePublicKey = async (): Promise<string> => {
+    const keysExist = await hasExistingKeys();
+    if (keysExist) {
+      return (await getPublicKey())!;
+    }
+    return generateAndStoreKeys();
+  };
+
   const onSubmit = async (data: PersonalInfoFormData) => {
     setIsLoading(true);
     setServerError("");
     try {
       if (currentUser) {
-        // Update existing user
         const { clerkUserId, ...updateData } = data;
-
-        // If user doesn't have publicKey, generate and include it
         if (!currentUser.publicKey) {
-          const keysExist = await hasExistingKeys();
-          let publicKey: string;
-          if (!keysExist) {
-            publicKey = await generateAndStoreKeys();
-          } else {
-            publicKey = (await getPublicKey())!;
-          }
-          await apiClient.put("/users/update-user", {
-            ...updateData,
-            publicKey,
-          });
+          const publicKey = await getOrGeneratePublicKey();
+          await apiClient.put("/users/update-user", { ...updateData, publicKey });
         } else {
           await apiClient.put("/users/update-user", updateData);
         }
       } else {
-        // First time account creation - always generate and send keys
-        const keysExist = await hasExistingKeys();
-        let publicKey: string;
-        if (!keysExist) {
-          publicKey = await generateAndStoreKeys();
-        } else {
-          publicKey = (await getPublicKey())!;
-        }
+        const publicKey = await getOrGeneratePublicKey();
         await apiClient.post("/users", { ...data, publicKey });
       }
       router.push("/(account)/complete-address");
-    } catch (err: any) {
-      if (err instanceof AxiosError && err.response) {
-        setServerError(err.response.data.message || "Something went wrong");
-      } else {
-        setServerError("Something went wrong");
-      }
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof AxiosError && err.response
+          ? err.response.data.message || "Something went wrong"
+          : "Something went wrong";
+      setServerError(errorMessage);
     } finally {
       setIsLoading(false);
     }
