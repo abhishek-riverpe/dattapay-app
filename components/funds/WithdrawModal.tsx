@@ -38,6 +38,7 @@ import useBiometricAuth from "@/hooks/useBiometricAuth";
 import generateSignature from "@/lib/generate-signature";
 import { getPublicKey, getPrivateKey } from "@/lib/key-generator";
 import { validateSolanaAddress, sanitizeSolanaAddress } from "@/lib/address-validator";
+import { sanitizeLabel, sanitizeAmount } from "@/lib/input-sanitizer";
 
 interface WithdrawModalProps {
   visible: boolean;
@@ -588,10 +589,11 @@ export default function WithdrawModal({
                     <View className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 mb-4">
                       <TextInput
                         value={label}
-                        onChangeText={setLabel}
+                        onChangeText={(text) => setLabel(sanitizeLabel(text))}
                         placeholder="e.g., My Binance Wallet"
                         placeholderTextColor="#9CA3AF"
                         className="text-gray-900 dark:text-white text-base"
+                        maxLength={100}
                       />
                     </View>
 
@@ -673,11 +675,12 @@ export default function WithdrawModal({
                     </Text>
                     <TextInput
                       value={withdrawAmount}
-                      onChangeText={setWithdrawAmount}
+                      onChangeText={(text) => setWithdrawAmount(sanitizeAmount(text))}
                       placeholder="0.00"
                       placeholderTextColor="#9CA3AF"
                       keyboardType="decimal-pad"
                       className="text-gray-900 dark:text-white text-3xl font-bold text-center min-w-[100px]"
+                      maxLength={15}
                     />
                   </View>
                 </View>
