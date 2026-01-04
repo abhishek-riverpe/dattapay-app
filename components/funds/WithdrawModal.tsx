@@ -236,7 +236,7 @@ export default function WithdrawModal({
   const handleStep2Continue = async () => {
     if (!selectedAccountId) return;
 
-    const amount = parseFloat(withdrawAmount);
+    const amount = Number.parseFloat(withdrawAmount);
     if (!amount || amount <= 0 || amount > availableBalance) {
       Toast.show({
         type: "error",
@@ -665,8 +665,8 @@ export default function WithdrawModal({
         disabled={
           isProcessing ||
           !withdrawAmount ||
-          parseFloat(withdrawAmount) <= 0 ||
-          parseFloat(withdrawAmount) > availableBalance
+          Number.parseFloat(withdrawAmount) <= 0 ||
+          Number.parseFloat(withdrawAmount) > availableBalance
         }
       >
         {isProcessing ? (

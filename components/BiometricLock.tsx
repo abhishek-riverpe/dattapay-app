@@ -25,6 +25,14 @@ const LOCKOUT_DURATIONS = [
   60 * 60 * 1000,    // Level 4: 1 hour
 ];
 
+// Duration text lookup for lockout messages
+const DURATION_TEXTS: Record<number, string> = {
+  1: "1 minute",
+  2: "5 minutes",
+  3: "15 minutes",
+  4: "1 hour",
+};
+
 export default function BiometricLock({ children }: BiometricLockProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -44,11 +52,11 @@ export default function BiometricLock({ children }: BiometricLockProps) {
       const until = await SecureStore.getItemAsync(LOCKOUT_UNTIL_KEY);
       const level = await SecureStore.getItemAsync(LOCKOUT_LEVEL_KEY);
 
-      if (attempts) setAuthAttempts(parseInt(attempts, 10));
-      if (level) setLockoutLevel(parseInt(level, 10));
+      if (attempts) setAuthAttempts(Number.parseInt(attempts, 10));
+      if (level) setLockoutLevel(Number.parseInt(level, 10));
 
       if (until) {
-        const untilTime = parseInt(until, 10);
+        const untilTime = Number.parseInt(until, 10);
         if (untilTime > Date.now()) {
           setLockoutUntil(untilTime);
         } else {
@@ -201,9 +209,7 @@ export default function BiometricLock({ children }: BiometricLockProps) {
       await saveLockoutState(0, newLevel, until); // Reset attempts for next round
       setAuthAttempts(0);
 
-      const durationText = newLevel === 1 ? "1 minute" :
-                          newLevel === 2 ? "5 minutes" :
-                          newLevel === 3 ? "15 minutes" : "1 hour";
+      const durationText = DURATION_TEXTS[newLevel] || "1 hour";
       setError(`Too many failed attempts. Please wait ${durationText} before trying again.`);
     } else {
       await saveLockoutState(newAttempts, lockoutLevel, null);

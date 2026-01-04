@@ -69,7 +69,7 @@ export function isValidSolanaAddress(address: string): boolean {
 
   // Attempt to decode and verify it produces exactly 32 bytes (Solana public key size)
   const decoded = base58Decode(trimmed);
-  if (!decoded || decoded.length !== 32) {
+  if (decoded?.length !== 32) {
     return false;
   }
 
@@ -107,7 +107,7 @@ export function validateSolanaAddress(address: string): string | null {
 
   // Verify base58 decoding produces exactly 32 bytes
   const decoded = base58Decode(trimmed);
-  if (!decoded || decoded.length !== 32) {
+  if (decoded?.length !== 32) {
     return "Invalid Solana address format";
   }
 

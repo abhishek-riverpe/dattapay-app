@@ -9,11 +9,11 @@ const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 function validateHost(url: string): boolean {
   try {
     const parsedUrl = new URL(url);
-    const allowedHosts = ["api.dattapay.com", "localhost", "127.0.0.1"];
+    const allowedHosts = new Set(["api.dattapay.com", "localhost", "127.0.0.1"]);
 
     // In development, allow any host but warn if non-standard
     if (__DEV__) {
-      if (!allowedHosts.includes(parsedUrl.hostname)) {
+      if (!allowedHosts.has(parsedUrl.hostname)) {
         console.warn(
           `[API] Connecting to non-standard host: ${parsedUrl.hostname}`
         );
@@ -21,7 +21,7 @@ function validateHost(url: string): boolean {
       return true;
     }
 
-    return allowedHosts.includes(parsedUrl.hostname);
+    return allowedHosts.has(parsedUrl.hostname);
   } catch {
     return false;
   }

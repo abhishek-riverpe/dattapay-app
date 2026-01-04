@@ -5,6 +5,23 @@ import useCurrentUser from "@/hooks/useCurrentUser";
 import { Home, Clock, Wallet, User } from "lucide-react-native";
 import BiometricLock from "@/components/BiometricLock";
 
+// Extract tab icon render functions outside the component
+const renderHomeIcon = ({ color, size }: { color: string; size: number }) => (
+  <Home size={size} color={color} />
+);
+
+const renderFundsIcon = ({ color, size }: { color: string; size: number }) => (
+  <Wallet size={size} color={color} />
+);
+
+const renderActivityIcon = ({ color, size }: { color: string; size: number }) => (
+  <Clock size={size} color={color} />
+);
+
+const renderAccountIcon = ({ color, size }: { color: string; size: number }) => (
+  <User size={size} color={color} />
+);
+
 export default function HomeLayout() {
   const { isSignedIn } = useAuth();
   const { isDark } = useTheme();
@@ -44,32 +61,28 @@ export default function HomeLayout() {
           name="index"
           options={{
             title: "Home",
-            tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+            tabBarIcon: renderHomeIcon,
           }}
         />
         <Tabs.Screen
           name="funds"
           options={{
             title: "Funds",
-            tabBarIcon: ({ color, size }) => (
-              <Wallet size={size} color={color} />
-            ),
+            tabBarIcon: renderFundsIcon,
           }}
         />
         <Tabs.Screen
           name="activity"
           options={{
             title: "Activity",
-            tabBarIcon: ({ color, size }) => (
-              <Clock size={size} color={color} />
-            ),
+            tabBarIcon: renderActivityIcon,
           }}
         />
         <Tabs.Screen
           name="account"
           options={{
             title: "Account",
-            tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
+            tabBarIcon: renderAccountIcon,
           }}
         />
       </Tabs>

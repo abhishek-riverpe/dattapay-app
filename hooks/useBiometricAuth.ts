@@ -11,7 +11,6 @@ export default function useBiometricAuth() {
   ): Promise<BiometricAuthResult> => {
     try {
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
-      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
       const securityLevel = await LocalAuthentication.getEnrolledLevelAsync();
 
       // Check if device has any security (biometric or passcode)
