@@ -161,34 +161,28 @@ export default function BiometricLock({ children }: BiometricLockProps) {
     }
   };
 
+  const getBiometricTypeName = (types: LocalAuthentication.AuthenticationType[]): string => {
+    if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+      return "Face ID";
+    }
+    if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+      return "Fingerprint";
+    }
+    if (types.includes(LocalAuthentication.AuthenticationType.IRIS)) {
+      return "Iris";
+    }
+    return "Passcode";
+  };
+
   const checkBiometricSupport = async () => {
-    const types =
-      await LocalAuthentication.supportedAuthenticationTypesAsync();
+    const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
     const securityLevel = await LocalAuthentication.getEnrolledLevelAsync();
     const hasHardware = await LocalAuthentication.hasHardwareAsync();
 
-    // Check if any device security is available
     setSecurityAvailable(
       hasHardware || securityLevel !== LocalAuthentication.SecurityLevel.NONE
     );
-
-    if (
-      types.includes(
-        LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION
-      )
-    ) {
-      setBiometricType("Face ID");
-    } else if (
-      types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)
-    ) {
-      setBiometricType("Fingerprint");
-    } else if (
-      types.includes(LocalAuthentication.AuthenticationType.IRIS)
-    ) {
-      setBiometricType("Iris");
-    } else {
-      setBiometricType("Passcode");
-    }
+    setBiometricType(getBiometricTypeName(types));
   };
 
   // Handle failed authentication attempt with exponential backoff
