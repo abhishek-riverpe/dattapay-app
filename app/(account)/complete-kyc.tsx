@@ -14,6 +14,7 @@ import {
 } from "lucide-react-native";
 import * as React from "react";
 import * as Linking from "expo-linking";
+import Toast from "react-native-toast-message";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -60,14 +61,57 @@ export default function CompleteKYCScreen() {
     }
   };
 
+  // Validate URL against allowed domains before opening
+  const isValidExternalUrl = (url: string): boolean => {
+    try {
+      const parsedUrl = new URL(url);
+      // Only allow HTTPS URLs
+      if (parsedUrl.protocol !== "https:") {
+        return false;
+      }
+      // Whitelist of allowed domains for KYC/TOS links
+      const allowedDomains = [
+        "zynklabs.xyz",
+        "qaapi.zynklabs.xyz",
+        "api.zynklabs.xyz",
+        "dattapay.com",
+        "api.dattapay.com",
+      ];
+      // Check if hostname ends with any allowed domain
+      return allowedDomains.some(
+        (domain) =>
+          parsedUrl.hostname === domain ||
+          parsedUrl.hostname.endsWith(`.${domain}`)
+      );
+    } catch {
+      return false;
+    }
+  };
+
   const handleOpenKycLink = () => {
     if (kycLink) {
+      if (!isValidExternalUrl(kycLink)) {
+        Toast.show({
+          type: "error",
+          text1: "Invalid Link",
+          text2: "Unable to open KYC verification link",
+        });
+        return;
+      }
       Linking.openURL(kycLink);
     }
   };
 
   const handleOpenTosLink = () => {
     if (tosLink) {
+      if (!isValidExternalUrl(tosLink)) {
+        Toast.show({
+          type: "error",
+          text1: "Invalid Link",
+          text2: "Unable to open Terms of Service link",
+        });
+        return;
+      }
       Linking.openURL(tosLink);
     }
   };

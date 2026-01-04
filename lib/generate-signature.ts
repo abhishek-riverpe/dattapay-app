@@ -39,9 +39,9 @@ const generateSignature = async ({ payload, publicKey, privateKey }: SignInput) 
     };
 
     return toBase64Url(JSON.stringify(stampObj));
-  } catch (error) {
-    console.error("Error signing payload:", error);
-    throw error;
+  } catch {
+    // Use generic error message to prevent exposing private key or signature details
+    throw new Error("Failed to generate signature");
   }
 };
 

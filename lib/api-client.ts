@@ -1,4 +1,5 @@
 import axios from "axios";
+import { randomUUID } from "expo-crypto";
 import { getClerkInstance } from "@clerk/clerk-expo";
 import { getOrCreateAdminToken } from "./token-generator";
 
@@ -13,7 +14,9 @@ function validateHost(url: string): boolean {
     // In development, allow any host but warn if non-standard
     if (__DEV__) {
       if (!allowedHosts.includes(parsedUrl.hostname)) {
-        console.warn(`[API] Connecting to non-standard host: ${parsedUrl.hostname}`);
+        console.warn(
+          `[API] Connecting to non-standard host: ${parsedUrl.hostname}`
+        );
       }
       return true;
     }
@@ -45,9 +48,12 @@ apiClient.interceptors.request.use(async (config) => {
     const clerk = getClerkInstance();
     const authToken = await clerk.session?.getToken();
     const adminToken = getOrCreateAdminToken();
-
+    const idempotencyKey = randomUUID();
     if (adminToken) {
       config.headers["x-api-token"] = adminToken;
+    }
+    if (idempotencyKey) {
+      config.headers["idempotency-Key"] = idempotencyKey;
     }
     if (authToken) {
       config.headers["x-auth-token"] = authToken;
@@ -55,7 +61,10 @@ apiClient.interceptors.request.use(async (config) => {
   } catch (error) {
     // Log token errors in development for debugging
     if (__DEV__) {
-      console.warn("[API] Token error:", error instanceof Error ? error.message : "Unknown error");
+      console.warn(
+        "[API] Token error:",
+        error instanceof Error ? error.message : "Unknown error"
+      );
     }
   }
   return config;
@@ -66,9 +75,11 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     // Handle SSL/certificate errors
-    if (error.code === "UNABLE_TO_VERIFY_LEAF_SIGNATURE" ||
-        error.code === "CERT_HAS_EXPIRED" ||
-        error.code === "ERR_TLS_CERT_ALTNAME_INVALID") {
+    if (
+      error.code === "UNABLE_TO_VERIFY_LEAF_SIGNATURE" ||
+      error.code === "CERT_HAS_EXPIRED" ||
+      error.code === "ERR_TLS_CERT_ALTNAME_INVALID"
+    ) {
       // Log security event (without exposing details to user)
       console.warn("SSL certificate validation failed");
       throw new Error("Secure connection could not be established");

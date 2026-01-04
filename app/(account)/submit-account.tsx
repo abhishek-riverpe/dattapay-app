@@ -2,6 +2,7 @@ import ThemeButton from "@/components/ui/ThemeButton";
 import { useTheme } from "@/context/ThemeContext";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import apiClient from "@/lib/api-client";
+import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
 import {
@@ -26,6 +27,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function SubmitAccountScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
+  const queryClient = useQueryClient();
   const { data: currentUserResponse } = useCurrentUser();
   const currentUser = currentUserResponse?.data;
   const isPendingKyc = currentUser?.accountStatus === "PENDING";
@@ -47,6 +49,7 @@ export default function SubmitAccountScreen() {
 
     try {
       await apiClient.post("/zynk/entities");
+      await queryClient.invalidateQueries({ queryKey: ["current"] });
       router.replace("/(account)/complete-kyc");
     } catch (err) {
       if (err instanceof AxiosError && err.response) {
