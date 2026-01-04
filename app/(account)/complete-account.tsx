@@ -117,11 +117,11 @@ export default function CompleteAccountScreen() {
     try {
       if (currentUser) {
         const { clerkUserId, ...updateData } = data;
-        if (!currentUser.publicKey) {
+        if (currentUser.publicKey) {
+          await apiClient.put("/users/update-user", updateData);
+        } else {
           const publicKey = await getOrGeneratePublicKey();
           await apiClient.put("/users/update-user", { ...updateData, publicKey });
-        } else {
-          await apiClient.put("/users/update-user", updateData);
         }
       } else {
         const publicKey = await getOrGeneratePublicKey();

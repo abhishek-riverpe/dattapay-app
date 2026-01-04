@@ -33,7 +33,7 @@ const DURATION_TEXTS: Record<number, string> = {
   4: "1 hour",
 };
 
-export default function BiometricLock({ children }: BiometricLockProps) {
+export default function BiometricLock({ children }: Readonly<BiometricLockProps>) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<string | null>(null);

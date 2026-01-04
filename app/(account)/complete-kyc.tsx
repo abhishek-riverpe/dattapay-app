@@ -135,7 +135,7 @@ export default function CompleteKYCScreen() {
           <View className="flex-1 px-6 pt-6">
             {/* Back Button */}
             <Pressable
-              onPress={() => router.push(currentUser?.accountStatus !== "INITIAL" ? "/(account)/complete-account" : "/(account)/submit-account")}
+              onPress={() => router.push(currentUser?.accountStatus === "INITIAL" ? "/(account)/submit-account" : "/(account)/complete-account")}
               className="flex-row items-center mb-4"
             >
               <ChevronLeft size={24} color={isDark ? "#fff" : "#000"} />
