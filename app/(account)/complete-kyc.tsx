@@ -13,7 +13,7 @@ import {
   Shield,
 } from "lucide-react-native";
 import * as React from "react";
-import * as Linking from "expo-linking";
+import * as WebBrowser from "expo-web-browser";
 import Toast from "react-native-toast-message";
 import {
   KeyboardAvoidingView,
@@ -61,58 +61,56 @@ export default function CompleteKYCScreen() {
     }
   };
 
-  // Validate URL against allowed domains before opening
-  const isValidExternalUrl = (url: string): boolean => {
+  // Debug: Log KYC links
+  React.useEffect(() => {
+    console.log("=== KYC Links Debug ===");
+    console.log("KYC Link:", kycLink);
+    console.log("TOS Link:", tosLink);
+  }, [kycLink, tosLink]);
+
+  const handleOpenKycLink = async () => {
+    console.log("Opening KYC Link:", kycLink);
+    if (!kycLink) {
+      Toast.show({
+        type: "error",
+        text1: "No Link",
+        text2: "KYC verification link is not available",
+      });
+      return;
+    }
+
     try {
-      const parsedUrl = new URL(url);
-      // Only allow HTTPS URLs
-      if (parsedUrl.protocol !== "https:") {
-        return false;
-      }
-      // Whitelist of allowed domains for KYC/TOS links
-      const allowedDomains = [
-        "zynklabs.xyz",
-        "qaapi.zynklabs.xyz",
-        "api.zynklabs.xyz",
-        "dattapay.com",
-        "api.dattapay.com",
-      ];
-      // Check if hostname ends with any allowed domain
-      return allowedDomains.some(
-        (domain) =>
-          parsedUrl.hostname === domain ||
-          parsedUrl.hostname.endsWith(`.${domain}`)
-      );
-    } catch {
-      return false;
+      await WebBrowser.openBrowserAsync(kycLink);
+    } catch (err) {
+      console.log("Error opening KYC link:", err);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Failed to open KYC verification link",
+      });
     }
   };
 
-  const handleOpenKycLink = () => {
-    if (kycLink) {
-      if (!isValidExternalUrl(kycLink)) {
-        Toast.show({
-          type: "error",
-          text1: "Invalid Link",
-          text2: "Unable to open KYC verification link",
-        });
-        return;
-      }
-      Linking.openURL(kycLink);
+  const handleOpenTosLink = async () => {
+    console.log("Opening TOS Link:", tosLink);
+    if (!tosLink) {
+      Toast.show({
+        type: "error",
+        text1: "No Link",
+        text2: "Terms of Service link is not available",
+      });
+      return;
     }
-  };
 
-  const handleOpenTosLink = () => {
-    if (tosLink) {
-      if (!isValidExternalUrl(tosLink)) {
-        Toast.show({
-          type: "error",
-          text1: "Invalid Link",
-          text2: "Unable to open Terms of Service link",
-        });
-        return;
-      }
-      Linking.openURL(tosLink);
+    try {
+      await WebBrowser.openBrowserAsync(tosLink);
+    } catch (err) {
+      console.log("Error opening TOS link:", err);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Failed to open Terms of Service link",
+      });
     }
   };
 

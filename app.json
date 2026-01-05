@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "DattaPay",
-    "slug": "DattaPay",
+    "slug": "dattapay",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -44,7 +44,8 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -53,9 +54,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "f5244d67-5e6b-4770-8e4b-cd97e4835193"
+        "projectId": "1505cbaf-7c62-47ef-a8a3-cafbe7d72718"
       }
     },
-    "owner": "itsabhishek01"
+    "owner": "herdoydev-llc"
   }
 }
