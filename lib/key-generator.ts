@@ -6,7 +6,14 @@ import elliptic from "elliptic";
 import CryptoJS from "crypto-js";
 
 const EC = elliptic.ec;
-const ec = new EC("p256");
+let ec: InstanceType<typeof EC> | null = null;
+
+function getEC() {
+  if (!ec) {
+    ec = new EC("p256");
+  }
+  return ec;
+}
 
 const PRIVATE_KEY_ALIAS = "dattapay_private_key";
 const PUBLIC_KEY_ALIAS = "dattapay_public_key";
@@ -76,7 +83,7 @@ function generateKeyPair(): KeyPair {
     .join("");
 
   // Generate key pair with provided entropy
-  const keyPair = ec.genKeyPair({ entropy: entropyHex });
+  const keyPair = getEC().genKeyPair({ entropy: entropyHex });
   const compressedPublicKey = keyPair.getPublic(true, "hex");
   const privateKeyHex = keyPair.getPrivate("hex").padStart(64, "0");
 

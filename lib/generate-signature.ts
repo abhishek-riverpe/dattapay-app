@@ -2,7 +2,14 @@ import elliptic from "elliptic";
 import * as Crypto from "expo-crypto";
 
 const EC = elliptic.ec;
-const ec = new EC("p256");
+let ec: InstanceType<typeof EC> | null = null;
+
+function getEC() {
+  if (!ec) {
+    ec = new EC("p256");
+  }
+  return ec;
+}
 
 // SHA-256 hashing function using expo-crypto
 const sha256 = async (input: string): Promise<string> => {
@@ -27,7 +34,7 @@ interface SignInput {
 const generateSignature = async ({ payload, publicKey, privateKey }: SignInput) => {
   if (!payload || !privateKey || !publicKey) return;
   try {
-    const key = ec.keyFromPrivate(privateKey, "hex");
+    const key = getEC().keyFromPrivate(privateKey, "hex");
     const hashHex = await sha256(payload);
     const signature = key.sign(hashHex, { canonical: true });
     const derHex = signature.toDER("hex");

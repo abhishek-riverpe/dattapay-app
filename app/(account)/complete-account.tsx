@@ -104,7 +104,10 @@ export default function CompleteAccountScreen() {
           await apiClient.put("/users/update-user", updateData);
         } else {
           const publicKey = await getOrGeneratePublicKey();
-          await apiClient.put("/users/update-user", { ...updateData, publicKey });
+          await apiClient.put("/users/update-user", {
+            ...updateData,
+            publicKey,
+          });
         }
       } else {
         const publicKey = await getOrGeneratePublicKey();
@@ -112,6 +115,7 @@ export default function CompleteAccountScreen() {
       }
       router.push("/(account)/complete-address");
     } catch (err: unknown) {
+      console.log(err);
       const errorMessage =
         err instanceof AxiosError && err.response
           ? err.response.data.message || "Something went wrong"
