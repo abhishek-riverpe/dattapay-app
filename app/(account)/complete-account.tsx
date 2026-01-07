@@ -48,9 +48,9 @@ export default function CompleteAccountScreen() {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
       email: user?.emailAddresses[0]?.emailAddress || "",
-      phoneNumberPrefix: "",
+      phoneNumberPrefix: "+91",
       phoneNumber: "",
-      nationality: "",
+      nationality: "IN",
       dateOfBirth: "",
     },
   });
@@ -80,7 +80,7 @@ export default function CompleteAccountScreen() {
         email: user.emailAddresses[0]?.emailAddress || "",
         phoneNumberPrefix: "+91",
         phoneNumber: "",
-        nationality: "",
+        nationality: "IN",
         dateOfBirth: "",
       });
     }
@@ -263,14 +263,13 @@ export default function CompleteAccountScreen() {
                   field: { onChange, value },
                   fieldState: { error },
                 }) => (
-                  <ThemeTextInput
+                  <CountryPicker
                     label="Nationality"
-                    placeholder="Select"
                     value={value}
-                    onChangeText={onChange}
+                    onSelect={(country) => onChange(country.code)}
                     errorMessage={error?.message}
-                    leftIcon={Globe}
-                    disabled
+                    displayField="name"
+                    valueField="code"
                   />
                 )}
               />

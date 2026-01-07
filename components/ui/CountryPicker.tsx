@@ -16,6 +16,15 @@ type CountryPickerProps = {
   onSelect: (country: Country) => void;
   label?: string;
   errorMessage?: string;
+  /**
+   * Which field to show in the input (dial code by default).
+   * Use "name" when selecting nationality.
+   */
+  displayField?: "dialCode" | "name";
+  /**
+   * Which field to match the current value against (dialCode by default).
+   */
+  valueField?: "dialCode" | "code";
 };
 
 export default function CountryPicker({
@@ -23,14 +32,19 @@ export default function CountryPicker({
   onSelect,
   label,
   errorMessage,
+  displayField = "dialCode",
+  valueField = "dialCode",
 }: CountryPickerProps) {
   const { isDark } = useTheme();
   const [visible, setVisible] = useState(false);
   const [search, setSearch] = useState("");
 
-  const selectedCountry = countries.find(
-    (c) => c.dialCode === value || c.dialCode === `+${value}`
-  );
+  const selectedCountry = countries.find((c) => {
+    if (valueField === "dialCode") {
+      return c.dialCode === value || c.dialCode === `+${value}`;
+    }
+    return c.code === value;
+  });
 
   const filteredCountries = countries.filter(
     (country) =>
@@ -59,7 +73,11 @@ export default function CountryPicker({
         }`}
       >
         <Text className="text-gray-900 dark:text-white text-base">
-          {selectedCountry ? `${selectedCountry.dialCode}` : "Select country"}
+          {selectedCountry
+            ? displayField === "name"
+              ? selectedCountry.name
+              : selectedCountry.dialCode
+            : "Select country"}
         </Text>
         <ChevronDown size={20} color={isDark ? "#9CA3AF" : "#6B7280"} />
       </Pressable>
