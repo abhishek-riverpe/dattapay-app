@@ -3,7 +3,7 @@ import ThemeTextInput from "@/components/ui/ThemeTextInput";
 import CountryPicker from "@/components/ui/CountryPicker";
 import DatePicker from "@/components/ui/DatePicker";
 import FormErrorMessage from "@/components/ui/FormErrorMessage";
-import { Mail, Globe } from "lucide-react-native";
+import { Mail } from "lucide-react-native";
 import SignOutButton from "@/components/SignOutButton";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import useKeyboardHeight from "@/hooks/useKeyboardHeight";

@@ -46,6 +46,15 @@ export default function CountryPicker({
     return c.code === value;
   });
 
+  let displayText = "Select country";
+  if (selectedCountry) {
+    if (displayField === "name") {
+      displayText = selectedCountry.name;
+    } else {
+      displayText = selectedCountry.dialCode;
+    }
+  }
+
   const filteredCountries = countries.filter(
     (country) =>
       country.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -73,11 +82,7 @@ export default function CountryPicker({
         }`}
       >
         <Text className="text-gray-900 dark:text-white text-base">
-          {selectedCountry
-            ? displayField === "name"
-              ? selectedCountry.name
-              : selectedCountry.dialCode
-            : "Select country"}
+          {displayText}
         </Text>
         <ChevronDown size={20} color={isDark ? "#9CA3AF" : "#6B7280"} />
       </Pressable>

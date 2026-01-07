@@ -34,12 +34,12 @@ const normalizeActivity = (activity: ServerActivity): Activity => {
   const meta = (activity.metadata as Record<string, unknown> | undefined) || {};
 
   const amountValue = activity.amount ?? meta.amount;
-  const amount =
-    typeof amountValue === "string"
-      ? parseFloat(amountValue)
-      : typeof amountValue === "number"
-        ? amountValue
-        : 0;
+  let amount = 0;
+  if (typeof amountValue === "string") {
+    amount = Number.parseFloat(amountValue);
+  } else if (typeof amountValue === "number") {
+    amount = amountValue;
+  }
 
   const type = withdrawTypes.has(activity.type?.toUpperCase())
     ? "withdraw"
