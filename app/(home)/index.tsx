@@ -1,16 +1,24 @@
 import SignOutButton from "@/components/SignOutButton";
 import ActivityDetailsModal from "@/components/activity/ActivityDetailsModal";
 import ActivityItem from "@/components/activity/ActivityItem";
-import { Activity, DUMMY_ACTIVITIES } from "@/components/activity/types";
+import { Activity } from "@/components/activity/types";
 import BankDetailsModal from "@/components/funds/BankDetailsModal";
 import WithdrawModal from "@/components/funds/WithdrawModal";
 import QuickAction from "@/components/ui/QuickAction";
 import ThemeButton from "@/components/ui/ThemeButton";
 import useCurrentUser from "@/hooks/useCurrentUser";
+import { useActivities } from "@/hooks/useActivities";
 import { useRouter } from "expo-router";
 import { AlertTriangle } from "lucide-react-native";
 import { useState } from "react";
-import { Image, Modal, Pressable, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // Dummy avatar for demo
@@ -28,10 +36,15 @@ export default function HomeScreen() {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
     null
   );
+  const {
+    data: activities,
+    isLoading: activitiesLoading,
+    isError: activitiesError,
+  } = useActivities();
   const isAccountActive = user?.data?.accountStatus === "ACTIVE";
 
   // Get first 3 activities for recent activity section
-  const recentActivities = DUMMY_ACTIVITIES.slice(0, 3);
+  const recentActivities = (activities || []).slice(0, 3);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-[#1A1A1A]">
@@ -95,7 +108,40 @@ export default function HomeScreen() {
           </View>
 
           <View className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden">
-            {recentActivities.map((activity, index) => (
+          {activitiesLoading && (
+            <View className="items-center py-6">
+              <ActivityIndicator />
+              <Text className="text-gray-500 dark:text-gray-400 mt-2">
+                Loading activities...
+              </Text>
+            </View>
+          )}
+
+          {activitiesError && !activitiesLoading && (
+            <View className="items-center py-6 px-4">
+              <Text className="text-gray-700 dark:text-gray-300 font-medium">
+                Unable to load activities
+              </Text>
+              <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                Please try again later.
+              </Text>
+            </View>
+          )}
+
+          {!activitiesLoading && !activitiesError && recentActivities.length === 0 && (
+            <View className="items-center py-6 px-4">
+              <Text className="text-gray-700 dark:text-gray-300 font-medium">
+                No activity yet
+              </Text>
+              <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                Your recent transactions will show here.
+              </Text>
+            </View>
+          )}
+
+          {!activitiesLoading &&
+            !activitiesError &&
+            recentActivities.map((activity, index) => (
               <ActivityItem
                 key={activity.id}
                 activity={activity}

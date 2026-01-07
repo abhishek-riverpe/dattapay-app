@@ -11,50 +11,6 @@ export type Activity = {
   txHash: string;
 };
 
-// Dummy activity data
-export const DUMMY_ACTIVITIES: Activity[] = [
-  {
-    id: "1",
-    type: "withdraw",
-    status: "completed",
-    amount: 498,
-    crypto: "USDC",
-    destination: "Chase Checking ***1234",
-    date: "2024-12-30T10:30:00",
-    txHash: "5xK9mNp3qRs7tVw2yBc8dEf4gHj6kLm9nPq",
-  },
-  {
-    id: "2",
-    type: "deposit",
-    status: "completed",
-    amount: 500,
-    crypto: "USDC",
-    source: "Bank Transfer",
-    date: "2024-12-29T14:20:00",
-    txHash: "7yL2qRs8tVw3zAb4cDe5fGh6iJk7lMn8oPq",
-  },
-  {
-    id: "3",
-    type: "withdraw",
-    status: "processing",
-    amount: 150,
-    crypto: "USDT",
-    destination: "Chase Checking ***1234",
-    date: "2024-12-30T09:15:00",
-    txHash: "3zM5tVw2xYz6aBc7dEf8gHi9jKl0mNo1pQr",
-  },
-  {
-    id: "4",
-    type: "deposit",
-    status: "failed",
-    amount: 200,
-    crypto: "USDC",
-    source: "Wire Transfer",
-    date: "2024-12-28T16:45:00",
-    txHash: "9aB1xYz6cDe7fGh8iJk9lMn0oPq1rSt2uVw",
-  },
-];
-
 // Helper functions
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
