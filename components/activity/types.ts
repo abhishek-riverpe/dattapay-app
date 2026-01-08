@@ -1,14 +1,25 @@
 // Type definition for activity
 export type Activity = {
   id: string;
+  /**
+   * Direction is used for iconography and +/- amounts.
+   * Server type is preserved separately in `title`.
+   */
   type: "withdraw" | "deposit";
+  title: string;
   status: "completed" | "processing" | "failed";
-  amount: number;
+  amount: number | null;
   crypto: string;
   destination?: string;
   source?: string;
   date: string;
   txHash: string;
+  rawType?: string;
+  isFinancial: boolean;
+  description?: string | null;
+  network?: string | null;
+  fee?: number | null;
+  referenceId?: string | null;
 };
 
 // Helper functions

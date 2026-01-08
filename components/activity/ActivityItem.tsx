@@ -15,6 +15,14 @@ export default function ActivityItem({
 }: Readonly<ActivityItemProps>) {
   const statusColors = getStatusColor(activity.status);
   const isWithdraw = activity.type === "withdraw";
+  const amountText =
+    activity.amount !== null && Number.isFinite(activity.amount)
+      ? activity.amount.toFixed(2)
+      : "--";
+  const signedAmount =
+    amountText === "--"
+      ? amountText
+      : `${isWithdraw ? "-" : "+"}${amountText} ${activity.crypto}`;
 
   return (
     <Pressable
@@ -41,7 +49,7 @@ export default function ActivityItem({
       {/* Details */}
       <View className="flex-1">
         <Text className="text-gray-900 dark:text-white font-medium">
-          {isWithdraw ? "Withdrawal" : "Deposit"}
+          {activity.title || (isWithdraw ? "Withdrawal" : "Deposit")}
         </Text>
         <Text className="text-gray-500 dark:text-gray-400 text-sm">
           {formatDate(activity.date)}
@@ -57,7 +65,7 @@ export default function ActivityItem({
               : "text-accent-600 dark:text-accent-400"
           }`}
         >
-          {isWithdraw ? "-" : "+"}${activity.amount.toFixed(2)}
+          {signedAmount}
         </Text>
         <View className={`px-2 py-0.5 rounded-full mt-1 ${statusColors.bg}`}>
           <Text className={`text-xs font-medium ${statusColors.text}`}>

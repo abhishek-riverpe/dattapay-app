@@ -16,6 +16,7 @@ import {
   Image,
   Modal,
   Pressable,
+  ScrollView,
   Text,
   View,
 } from "react-native";
@@ -44,11 +45,15 @@ export default function HomeScreen() {
   const isAccountActive = user?.data?.accountStatus === "ACTIVE";
 
   // Get first 3 activities for recent activity section
-  const recentActivities = (activities || []).slice(0, 3);
+  const recentActivities = (activities || []).slice(0, 10);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-[#1A1A1A]">
-      <View className="flex-1">
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 24 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View className="bg-primary px-6 pt-4 pb-8 rounded-b-3xl">
           <View className="flex-row justify-between items-center mb-6">
@@ -92,7 +97,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Recent Activity */}
-        <View className="flex-1 px-6 mt-6 pb-4">
+        <View className="px-6 mt-6 pb-4">
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-gray-900 dark:text-white text-lg font-bold">
               Recent Activity
@@ -108,50 +113,52 @@ export default function HomeScreen() {
           </View>
 
           <View className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden">
-          {activitiesLoading && (
-            <View className="items-center py-6">
-              <ActivityIndicator />
-              <Text className="text-gray-500 dark:text-gray-400 mt-2">
-                Loading activities...
-              </Text>
-            </View>
-          )}
+            {activitiesLoading && (
+              <View className="items-center py-6">
+                <ActivityIndicator />
+                <Text className="text-gray-500 dark:text-gray-400 mt-2">
+                  Loading activities...
+                </Text>
+              </View>
+            )}
 
-          {activitiesError && !activitiesLoading && (
-            <View className="items-center py-6 px-4">
-              <Text className="text-gray-700 dark:text-gray-300 font-medium">
-                Unable to load activities
-              </Text>
-              <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-                Please try again later.
-              </Text>
-            </View>
-          )}
+            {activitiesError && !activitiesLoading && (
+              <View className="items-center py-6 px-4">
+                <Text className="text-gray-700 dark:text-gray-300 font-medium">
+                  Unable to load activities
+                </Text>
+                <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                  Please try again later.
+                </Text>
+              </View>
+            )}
 
-          {!activitiesLoading && !activitiesError && recentActivities.length === 0 && (
-            <View className="items-center py-6 px-4">
-              <Text className="text-gray-700 dark:text-gray-300 font-medium">
-                No activity yet
-              </Text>
-              <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-                Your recent transactions will show here.
-              </Text>
-            </View>
-          )}
+            {!activitiesLoading &&
+              !activitiesError &&
+              recentActivities.length === 0 && (
+                <View className="items-center py-6 px-4">
+                  <Text className="text-gray-700 dark:text-gray-300 font-medium">
+                    No activity yet
+                  </Text>
+                  <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                    Your recent transactions will show here.
+                  </Text>
+                </View>
+              )}
 
-          {!activitiesLoading &&
-            !activitiesError &&
-            recentActivities.map((activity, index) => (
-              <ActivityItem
-                key={activity.id}
-                activity={activity}
-                onPress={() => setSelectedActivity(activity)}
-                isLast={index === recentActivities.length - 1}
-              />
-            ))}
+            {!activitiesLoading &&
+              !activitiesError &&
+              recentActivities.map((activity, index) => (
+                <ActivityItem
+                  key={activity.id}
+                  activity={activity}
+                  onPress={() => setSelectedActivity(activity)}
+                  isLast={index === recentActivities.length - 1}
+                />
+              ))}
           </View>
         </View>
-      </View>
+      </ScrollView>
 
       {/* Profile Dropdown Modal */}
       <Modal

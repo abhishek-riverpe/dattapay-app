@@ -16,6 +16,14 @@ export default function ActivityDetailsModal({
   onClose,
 }: Readonly<ActivityDetailsModalProps>) {
   const [copied, setCopied] = useState(false);
+  const amountText =
+    activity?.amount !== null && activity?.amount !== undefined
+      ? activity.amount.toFixed(2)
+      : "--";
+  const signedAmount =
+    amountText === "--"
+      ? "--"
+      : `${activity?.type === "withdraw" ? "-" : "+"}${amountText} ${activity?.crypto ?? ""}`;
 
   const copyTxHash = async (hash: string) => {
     await Clipboard.setStringAsync(hash);
@@ -74,10 +82,10 @@ export default function ActivityDetailsModal({
                   : "text-accent-600 dark:text-accent-400"
               }`}
             >
-              {isWithdraw ? "-" : "+"}${activity.amount.toFixed(2)}
+              {signedAmount}
             </Text>
             <Text className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-              {activity.crypto}
+              {activity.crypto || "—"}
             </Text>
           </View>
 
@@ -89,7 +97,7 @@ export default function ActivityDetailsModal({
                 Type
               </Text>
               <Text className="text-gray-900 dark:text-white font-medium">
-                {isWithdraw ? "Withdrawal" : "Deposit"}
+                {activity.title || (isWithdraw ? "Withdrawal" : "Deposit")}
               </Text>
             </View>
 
@@ -99,7 +107,7 @@ export default function ActivityDetailsModal({
                 Network
               </Text>
               <Text className="text-gray-900 dark:text-white font-medium">
-                Solana
+                {activity.network || "—"}
               </Text>
             </View>
 
@@ -109,9 +117,21 @@ export default function ActivityDetailsModal({
                 {isWithdraw ? "To" : "From"}
               </Text>
               <Text className="text-gray-900 dark:text-white font-medium">
-                {activity.destination || activity.source}
+                {activity.destination || activity.source || "—"}
               </Text>
             </View>
+
+            {/* Description */}
+            {activity.description && (
+              <View className="flex-row justify-between mb-4">
+                <Text className="text-gray-500 dark:text-gray-400 text-sm">
+                  Description
+                </Text>
+                <Text className="text-gray-900 dark:text-white font-medium text-right flex-1 ml-4">
+                  {activity.description}
+                </Text>
+              </View>
+            )}
 
             {/* Date */}
             <View className="flex-row justify-between mb-4">
@@ -133,34 +153,48 @@ export default function ActivityDetailsModal({
               </Text>
             </View>
 
-            {/* Transaction ID */}
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-gray-500 dark:text-gray-400 text-sm">
-                Transaction ID
-              </Text>
-              <Pressable
-                onPress={() => copyTxHash(activity.txHash)}
-                className="flex-row items-center"
-              >
-                <Text className="text-gray-900 dark:text-white font-medium font-mono mr-2">
-                  {truncateHash(activity.txHash)}
+            {/* Transaction ID (only for financial activities) */}
+            {activity.isFinancial && (
+              <View className="flex-row justify-between items-center mb-4">
+                <Text className="text-gray-500 dark:text-gray-400 text-sm">
+                  Transaction ID
                 </Text>
-                {copied ? (
-                  <CheckCircle size={16} color="#10B981" />
-                ) : (
-                  <Copy size={16} color="#6B7280" />
-                )}
-              </Pressable>
-            </View>
+                <Pressable
+                  onPress={() => copyTxHash(activity.txHash)}
+                  className="flex-row items-center"
+                >
+                  <Text className="text-gray-900 dark:text-white font-medium font-mono mr-2">
+                    {truncateHash(activity.txHash)}
+                  </Text>
+                  {copied ? (
+                    <CheckCircle size={16} color="#10B981" />
+                  ) : (
+                    <Copy size={16} color="#6B7280" />
+                  )}
+                </Pressable>
+              </View>
+            )}
 
-            {/* Network Fee (only for withdrawals) */}
-            {isWithdraw && (
+            {/* Reference ID */}
+            {activity.referenceId && (
+              <View className="flex-row justify-between items-center mb-4">
+                <Text className="text-gray-500 dark:text-gray-400 text-sm">
+                  Reference ID
+                </Text>
+                <Text className="text-gray-900 dark:text-white font-medium font-mono">
+                  {truncateHash(activity.referenceId)}
+                </Text>
+              </View>
+            )}
+
+            {/* Network Fee */}
+            {activity.fee !== null && activity.fee !== undefined && (
               <View className="flex-row justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
                 <Text className="text-gray-500 dark:text-gray-400 text-sm">
                   Network Fee
                 </Text>
                 <Text className="text-gray-900 dark:text-white font-medium">
-                  $2.00
+                  {activity.fee.toFixed(2)} {activity.crypto}
                 </Text>
               </View>
             )}
