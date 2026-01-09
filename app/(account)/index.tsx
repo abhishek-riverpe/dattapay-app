@@ -1,9 +1,9 @@
 import { Redirect } from "expo-router";
-import useCurrentUser from "@/hooks/useCurrentUser";
+import useAccount from "@/hooks/useAccount";
 import { View, ActivityIndicator } from "react-native";
 
 export default function AccountIndex() {
-  const { data: currentUserResponse, isLoading } = useCurrentUser();
+  const { data: currentUserResponse, isLoading } = useAccount();
   const currentUser = currentUserResponse?.data;
 
   if (isLoading) {
@@ -15,7 +15,7 @@ export default function AccountIndex() {
   }
 
   // No user data - go to complete account
-  if (!currentUser) {
+  if (!currentUser?.user) {
     return <Redirect href="/(account)/complete-account" />;
   }
 

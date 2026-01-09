@@ -1,6 +1,6 @@
 import ThemeButton from "@/components/ui/ThemeButton";
 import { useTheme } from "@/context/ThemeContext";
-import useCurrentUser from "@/hooks/useCurrentUser";
+import useAccount from "@/hooks/useAccount";
 import apiClient from "@/lib/api-client";
 import { useKycStore } from "@/store";
 import { AxiosError } from "axios";
@@ -29,7 +29,7 @@ export default function CompleteKYCScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
   const { kycLink, tosLink, setKycData } = useKycStore();
-  const { data: currentUserResponse } = useCurrentUser();
+  const { data: currentUserResponse } = useAccount();
   const currentUser = currentUserResponse?.data;
   const isAccountActive = currentUser?.accountStatus === "PENDING";
 
@@ -37,9 +37,8 @@ export default function CompleteKYCScreen() {
   const [error, setError] = React.useState("");
 
   React.useEffect(() => {
-    if (!currentUser) return router.push("/(account)/complete-account");
-    if (currentUser?.accountStatus === "ACTIVE")
-      return router.push("/(home)");
+    if (!currentUser?.user) return router.push("/(account)/complete-account");
+    if (currentUser?.accountStatus === "ACTIVE") return router.push("/(home)");
   }, [currentUser]);
 
   const handleStartKYC = async () => {
@@ -133,7 +132,13 @@ export default function CompleteKYCScreen() {
           <View className="flex-1 px-6 pt-6">
             {/* Back Button */}
             <Pressable
-              onPress={() => router.push(currentUser?.accountStatus === "INITIAL" ? "/(account)/submit-account" : "/(account)/complete-account")}
+              onPress={() =>
+                router.push(
+                  currentUser?.accountStatus === "INITIAL"
+                    ? "/(account)/submit-account"
+                    : "/(account)/complete-account"
+                )
+              }
               className="flex-row items-center mb-4"
             >
               <ChevronLeft size={24} color={isDark ? "#fff" : "#000"} />

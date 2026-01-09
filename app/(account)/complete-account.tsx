@@ -5,7 +5,8 @@ import DatePicker from "@/components/ui/DatePicker";
 import FormErrorMessage from "@/components/ui/FormErrorMessage";
 import { Mail } from "lucide-react-native";
 import SignOutButton from "@/components/SignOutButton";
-import useCurrentUser from "@/hooks/useCurrentUser";
+import useAccount from "@/hooks/useAccount";
+import { useUser } from "@clerk/clerk-expo";
 import useKeyboardHeight from "@/hooks/useKeyboardHeight";
 import apiClient from "@/lib/api-client";
 import {
@@ -15,7 +16,6 @@ import {
 } from "@/lib/key-generator";
 import { PersonalInfoFormData, personalInfoSchema } from "@/schemas";
 import { Country } from "@/constants/countries";
-import { useUser } from "@clerk/clerk-expo";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
@@ -26,13 +26,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CompleteAccountScreen() {
   const router = useRouter();
-  const { user } = useUser();
-  const { data: currentUserResponse } = useCurrentUser();
-  const currentUser = currentUserResponse?.data;
   const keyboardHeight = useKeyboardHeight();
-
   const [isLoading, setIsLoading] = React.useState(false);
   const [serverError, setServerError] = React.useState("");
+  const { user: clerkUser } = useUser();
+  const { data: account } = useAccount();
+  const user = account?.data.user;
+
+  console.log("Current user:", user);
 
   const {
     control,
@@ -44,10 +45,10 @@ export default function CompleteAccountScreen() {
     resolver: yupResolver(personalInfoSchema),
     mode: "onChange",
     defaultValues: {
-      clerkUserId: user?.id || "",
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
-      email: user?.emailAddresses[0]?.emailAddress || "",
+      clerkUserId: clerkUser?.id || "",
+      firstName: clerkUser?.firstName || "",
+      lastName: clerkUser?.lastName || "",
+      email: clerkUser?.emailAddresses[0]?.emailAddress || "",
       phoneNumberPrefix: "+91",
       phoneNumber: "",
       nationality: "IN",
@@ -56,40 +57,40 @@ export default function CompleteAccountScreen() {
   });
 
   React.useEffect(() => {
-    if (currentUser) {
+    if (user) {
       const dateOfBirth =
-        currentUser.dateOfBirth instanceof Date
-          ? currentUser.dateOfBirth.toISOString().split("T")[0]
-          : String(currentUser.dateOfBirth).split("T")[0];
-
+        user.dateOfBirth instanceof Date
+          ? user.dateOfBirth.toISOString().split("T")[0]
+          : String(user.dateOfBirth).split("T")[0];
       reset({
-        clerkUserId: currentUser.clerkUserId,
-        firstName: currentUser.firstName,
-        lastName: currentUser.lastName,
-        email: currentUser.email,
-        phoneNumberPrefix: currentUser.phoneNumberPrefix,
-        phoneNumber: currentUser.phoneNumber,
-        nationality: currentUser.nationality,
+        clerkUserId: clerkUser?.id || "",
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phoneNumberPrefix: user.phoneNumberPrefix,
+        phoneNumber: user.phoneNumber,
+        nationality: user.nationality,
         dateOfBirth: dateOfBirth,
       });
-    } else if (user) {
+    } else if (clerkUser) {
       reset({
-        clerkUserId: user.id || "",
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        email: user.emailAddresses[0]?.emailAddress || "",
+        clerkUserId: clerkUser.id,
+        firstName: clerkUser.firstName || "",
+        lastName: clerkUser.lastName || "",
+        email: clerkUser.emailAddresses[0]?.emailAddress || "",
         phoneNumberPrefix: "+91",
         phoneNumber: "",
         nationality: "IN",
         dateOfBirth: "",
       });
     }
-  }, [currentUser, user, reset]);
+  }, [clerkUser, user, reset]);
 
   const getOrGeneratePublicKey = async (): Promise<string> => {
     const keysExist = await hasExistingKeys();
     if (keysExist) {
-      return (await getPublicKey())!;
+      const publicKey = await getPublicKey();
+      if (publicKey) return publicKey;
     }
     return generateAndStoreKeys();
   };
@@ -98,9 +99,9 @@ export default function CompleteAccountScreen() {
     setIsLoading(true);
     setServerError("");
     try {
-      if (currentUser) {
+      if (user) {
         const { clerkUserId, ...updateData } = data;
-        if (currentUser.publicKey) {
+        if (user.publicKey) {
           await apiClient.put("/users/update-user", updateData);
         } else {
           const publicKey = await getOrGeneratePublicKey();
@@ -115,7 +116,7 @@ export default function CompleteAccountScreen() {
       }
       router.push("/(account)/complete-address");
     } catch (err: unknown) {
-      console.log(err);
+      console.error(err);
       const errorMessage =
         err instanceof AxiosError && err.response
           ? err.response.data.message || "Something went wrong"
@@ -130,7 +131,6 @@ export default function CompleteAccountScreen() {
 
   const handleCountrySelect = (country: Country) => {
     setValue("phoneNumberPrefix", country.dialCode);
-    setValue("nationality", country.code);
   };
 
   return (
@@ -141,7 +141,6 @@ export default function CompleteAccountScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View className="px-6 pt-6 pb-8">
-          {/* Header */}
           <View className="mb-6">
             <Text className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Personal Information
@@ -150,12 +149,7 @@ export default function CompleteAccountScreen() {
               Let's start with your basic details
             </Text>
           </View>
-
-          {/* Server Error Message */}
           <FormErrorMessage message={serverError} />
-
-          {/* Form Fields */}
-          {/* Row 1: First Name & Last Name */}
           <View className="flex-row mb-4 gap-3">
             <View className="flex-1">
               <Controller
@@ -217,7 +211,6 @@ export default function CompleteAccountScreen() {
             />
           </View>
 
-          {/* Row 2: Country Picker & Phone Number */}
           <View className="flex-row mb-4 gap-3">
             <View className="w-28">
               <Controller
@@ -252,8 +245,6 @@ export default function CompleteAccountScreen() {
               />
             </View>
           </View>
-
-          {/* Row 3: Nationality & Date of Birth */}
           <View className="mb-4 gap-4">
             <View className="flex-1">
               <Controller
@@ -294,8 +285,6 @@ export default function CompleteAccountScreen() {
               />
             </View>
           </View>
-
-          {/* Submit Button */}
           <View className="mt-8 mb-6">
             <ThemeButton
               variant="primary"
@@ -303,10 +292,10 @@ export default function CompleteAccountScreen() {
               disabled={hasErrors}
               loading={isLoading}
             >
-              Continue
+              {user ? "Update and Continue" : "Continue"}
             </ThemeButton>
 
-            {currentUser && (
+            {user && (
               <>
                 <ThemeButton
                   variant="ghost"
@@ -321,7 +310,7 @@ export default function CompleteAccountScreen() {
               </>
             )}
 
-            {!currentUser && (
+            {!user && (
               <View className="mt-4">
                 <SignOutButton />
               </View>

@@ -4,7 +4,7 @@ import FormErrorMessage from "@/components/ui/FormErrorMessage";
 import ThemeButton from "@/components/ui/ThemeButton";
 import ThemeTextInput from "@/components/ui/ThemeTextInput";
 import { useTheme } from "@/context/ThemeContext";
-import useCurrentUser from "@/hooks/useCurrentUser";
+import useAccount from "@/hooks/useAccount";
 import useKeyboardHeight from "@/hooks/useKeyboardHeight";
 import apiClient from "@/lib/api-client";
 import { getUserFriendlyErrorMessage, logError } from "@/lib/error-handler";
@@ -20,7 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function CompleteAddressScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
-  const { data: currentUserResponse } = useCurrentUser();
+  const { data: currentUserResponse } = useAccount();
   const currentUser = currentUserResponse?.data;
   const keyboardHeight = useKeyboardHeight();
 

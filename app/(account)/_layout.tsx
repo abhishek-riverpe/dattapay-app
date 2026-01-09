@@ -1,11 +1,10 @@
 import { Redirect, Stack, useSegments } from "expo-router";
 import { useAuth } from "@clerk/clerk-expo";
-import useCurrentUser from "@/hooks/useCurrentUser";
-import { View, ActivityIndicator } from "react-native";
+import useAccount from "@/hooks/useAccount";
 
 export default function AccountSetupLayout() {
   const { isSignedIn } = useAuth();
-  const { data: currentUserResponse, isLoading } = useCurrentUser();
+  const { data: currentUserResponse, isLoading } = useAccount();
   const currentUser = currentUserResponse?.data;
   const segments = useSegments();
 
@@ -13,9 +12,9 @@ export default function AccountSetupLayout() {
     return <Redirect href="/(auth)/sign-in" />;
   }
 
-  // Only redirect if NOT loading AND no currentUser
+  // Only redirect if NOT loading AND no user data
   const currentScreen = segments[segments.length - 1];
-  if (!isLoading && !currentUser && currentScreen !== "complete-account") {
+  if (!isLoading && !currentUser?.user && currentScreen !== "complete-account") {
     return <Redirect href="/(account)/complete-account" />;
   }
 

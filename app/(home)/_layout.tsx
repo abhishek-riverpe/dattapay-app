@@ -1,7 +1,7 @@
 import { Redirect, Tabs } from "expo-router";
 import { useAuth } from "@clerk/clerk-expo";
 import { useTheme } from "@/context/ThemeContext";
-import useCurrentUser from "@/hooks/useCurrentUser";
+import useAccount from "@/hooks/useAccount";
 import { Home, Clock, Wallet, User } from "lucide-react-native";
 import BiometricLock from "@/components/BiometricLock";
 
@@ -14,25 +14,33 @@ const renderFundsIcon = ({ color, size }: { color: string; size: number }) => (
   <Wallet size={size} color={color} />
 );
 
-const renderActivityIcon = ({ color, size }: { color: string; size: number }) => (
-  <Clock size={size} color={color} />
-);
+const renderActivityIcon = ({
+  color,
+  size,
+}: {
+  color: string;
+  size: number;
+}) => <Clock size={size} color={color} />;
 
-const renderAccountIcon = ({ color, size }: { color: string; size: number }) => (
-  <User size={size} color={color} />
-);
+const renderAccountIcon = ({
+  color,
+  size,
+}: {
+  color: string;
+  size: number;
+}) => <User size={size} color={color} />;
 
 export default function HomeLayout() {
   const { isSignedIn } = useAuth();
   const { isDark } = useTheme();
-  const { data: currentUserResponse } = useCurrentUser();
+  const { data: currentUserResponse } = useAccount();
   const currentUser = currentUserResponse?.data;
 
   if (!isSignedIn) {
     return <Redirect href="/(auth)/sign-in" />;
   }
 
-  if (!currentUser) {
+  if (!currentUser?.user) {
     return <Redirect href="/(account)/complete-account" />;
   }
 

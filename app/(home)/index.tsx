@@ -6,7 +6,7 @@ import BankDetailsModal from "@/components/funds/BankDetailsModal";
 import WithdrawModal from "@/components/funds/WithdrawModal";
 import QuickAction from "@/components/ui/QuickAction";
 import ThemeButton from "@/components/ui/ThemeButton";
-import useCurrentUser from "@/hooks/useCurrentUser";
+import useAccount from "@/hooks/useAccount";
 import { useActivities } from "@/hooks/useActivities";
 import { useRouter } from "expo-router";
 import { AlertTriangle } from "lucide-react-native";
@@ -29,7 +29,8 @@ const DUMMY_AVATAR = require("@/assets/images/avatar_2.jpg");
 const AVAILABLE_BALANCE = 500;
 
 export default function HomeScreen() {
-  const { data: user } = useCurrentUser();
+  const { data: accountResponse } = useAccount();
+  const account = accountResponse?.data;
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showBankDetails, setShowBankDetails] = useState(false);
@@ -42,7 +43,7 @@ export default function HomeScreen() {
     isLoading: activitiesLoading,
     isError: activitiesError,
   } = useActivities();
-  const isAccountActive = user?.data?.accountStatus === "ACTIVE";
+  const isAccountActive = account?.accountStatus === "ACTIVE";
 
   // Get first 3 activities for recent activity section
   const recentActivities = (activities || []).slice(0, 10);
@@ -60,14 +61,11 @@ export default function HomeScreen() {
             <View>
               <Text className="text-primary-100 text-sm">Welcome back</Text>
               <Text className="text-white text-xl font-bold">
-                {user?.data.firstName || user?.data.email}
+                {account?.user ? account.user.firstName || account.user.email : ""}
               </Text>
             </View>
             <Pressable onPress={() => setShowDropdown(true)}>
-              <Image
-                source={DUMMY_AVATAR}
-                className="w-10 h-10 rounded-full"
-              />
+              <Image source={DUMMY_AVATAR} className="w-10 h-10 rounded-full" />
             </Pressable>
           </View>
 
@@ -172,15 +170,15 @@ export default function HomeScreen() {
             {/* User Info */}
             <View className="border-b border-gray-100 dark:border-gray-800 pb-3 mb-3">
               <Text className="text-gray-900 dark:text-white font-semibold">
-                {user?.data.firstName} {user?.data.lastName}
+                {account?.user ? `${account.user.firstName} ${account.user.lastName}` : ""}
               </Text>
               <Text className="text-gray-500 dark:text-gray-400 text-sm">
-                {user?.data.email}
+                {account?.user ? account.user.email : ""}
               </Text>
             </View>
 
             {/* Account Not Submitted Warning */}
-            {!isAccountActive && user?.data && (
+            {!isAccountActive && account?.user && (
               <Pressable
                 onPress={() => {
                   setShowDropdown(false);

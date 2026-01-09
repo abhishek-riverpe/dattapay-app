@@ -9,13 +9,13 @@ import { AlertTriangle } from "lucide-react-native";
 import SignOutButton from "@/components/SignOutButton";
 import ThemeToggle from "@/components/ThemeToggle";
 import IconCircle from "@/components/ui/IconCircle";
-import useCurrentUser from "@/hooks/useCurrentUser";
+import useAccount from "@/hooks/useAccount";
 import useBiometricAuth from "@/hooks/useBiometricAuth";
 
 export default function AccountScreen() {
   const { user } = useUser();
   const router = useRouter();
-  const { data: currentUserResponse } = useCurrentUser();
+  const { data: currentUserResponse } = useAccount();
   const currentUser = currentUserResponse?.data;
   const isAccountActive = currentUser?.accountStatus === "ACTIVE";
   const isPendingKyc = currentUser?.accountStatus === "PENDING";
@@ -48,13 +48,13 @@ export default function AccountScreen() {
               <Image source={DUMMY_AVATAR} className="w-16 h-16 rounded-full" />
               <View className="ml-4 flex-1">
                 <Text className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {currentUser?.firstName && currentUser?.lastName
-                    ? `${currentUser.firstName} ${currentUser.lastName}`
+                  {currentUser?.user && currentUser.user.firstName && currentUser.user.lastName
+                    ? `${currentUser.user.firstName} ${currentUser.user.lastName}`
                     : user?.firstName ||
                       user?.emailAddresses[0].emailAddress.split("@")[0]}
                 </Text>
                 <Text className="text-sm text-gray-500 dark:text-gray-400">
-                  {currentUser?.email || user?.emailAddresses[0].emailAddress}
+                  {(currentUser?.user && currentUser.user.email) || user?.emailAddresses[0].emailAddress}
                 </Text>
               </View>
             </View>
@@ -121,13 +121,13 @@ export default function AccountScreen() {
                   Email
                 </Text>
                 <Text className="text-gray-900 dark:text-white text-sm font-medium">
-                  {currentUser?.email || user?.emailAddresses[0].emailAddress}
+                  {(currentUser?.user && currentUser.user.email) || user?.emailAddresses[0].emailAddress}
                 </Text>
               </View>
             </View>
 
             {/* Phone Row */}
-            {currentUser?.phoneNumber && (
+            {currentUser?.user && currentUser.user.phoneNumber && (
               <View className="flex-row items-center p-4 border-b border-gray-100 dark:border-gray-800">
                 <IconCircle icon="📱" size="sm" color="gray" className="mr-3" />
                 <View className="flex-1">
@@ -135,14 +135,14 @@ export default function AccountScreen() {
                     Phone
                   </Text>
                   <Text className="text-gray-900 dark:text-white text-sm font-medium">
-                    {currentUser.phoneNumberPrefix} {currentUser.phoneNumber}
+                    {currentUser.user.phoneNumberPrefix} {currentUser.user.phoneNumber}
                   </Text>
                 </View>
               </View>
             )}
 
             {/* Nationality Row */}
-            {currentUser?.nationality && (
+            {currentUser?.user && currentUser.user.nationality && (
               <View className="flex-row items-center p-4 border-b border-gray-100 dark:border-gray-800">
                 <IconCircle icon="🌍" size="sm" color="gray" className="mr-3" />
                 <View className="flex-1">
@@ -150,7 +150,7 @@ export default function AccountScreen() {
                     Nationality
                   </Text>
                   <Text className="text-gray-900 dark:text-white text-sm font-medium">
-                    {currentUser.nationality}
+                    {currentUser.user.nationality}
                   </Text>
                 </View>
               </View>

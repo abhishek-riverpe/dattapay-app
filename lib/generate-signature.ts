@@ -31,7 +31,11 @@ interface SignInput {
   privateKey: string;
 }
 
-const generateSignature = async ({ payload, publicKey, privateKey }: SignInput) => {
+const generateSignature = async ({
+  payload,
+  publicKey,
+  privateKey,
+}: SignInput) => {
   if (!payload || !privateKey || !publicKey) return;
   try {
     const key = getEC().keyFromPrivate(privateKey, "hex");
@@ -47,7 +51,6 @@ const generateSignature = async ({ payload, publicKey, privateKey }: SignInput) 
 
     return toBase64Url(JSON.stringify(stampObj));
   } catch {
-    // Use generic error message to prevent exposing private key or signature details
     throw new Error("Failed to generate signature");
   }
 };

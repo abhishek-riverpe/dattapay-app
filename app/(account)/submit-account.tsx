@@ -1,6 +1,6 @@
 import ThemeButton from "@/components/ui/ThemeButton";
 import { useTheme } from "@/context/ThemeContext";
-import useCurrentUser from "@/hooks/useCurrentUser";
+import useAccount from "@/hooks/useAccount";
 import apiClient from "@/lib/api-client";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -28,16 +28,15 @@ export default function SubmitAccountScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
   const queryClient = useQueryClient();
-  const { data: currentUserResponse } = useCurrentUser();
+  const { data: currentUserResponse } = useAccount();
   const currentUser = currentUserResponse?.data;
   const isPendingKyc = currentUser?.accountStatus === "PENDING";
 
   React.useEffect(() => {
-    if (!currentUser) return router.push("/(account)/complete-account");
+    if (!currentUser?.user) return router.push("/(account)/complete-account");
     if (currentUser?.accountStatus === "PENDING")
       return router.push("/(account)/complete-kyc");
-    if (currentUser?.accountStatus === "ACTIVE")
-      return router.push("/(home)");
+    if (currentUser?.accountStatus === "ACTIVE") return router.push("/(home)");
   }, [currentUser]);
 
   const [isLoading, setIsLoading] = React.useState(false);

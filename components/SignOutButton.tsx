@@ -4,7 +4,6 @@ import { Text } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import ThemeButton from "@/components/ui/ThemeButton";
 import { useKycStore } from "@/store";
-import { clearAdminToken } from "@/lib/token-generator";
 
 export default function SignOutButton() {
   const { signOut } = useClerk();
@@ -15,13 +14,15 @@ export default function SignOutButton() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      clearAdminToken();
       queryClient.clear();
       clearKycData();
       router.replace("/(auth)/sign-in");
     } catch (err) {
       if (__DEV__) {
-        console.error("Sign out error:", err instanceof Error ? err.message : "Unknown error");
+        console.error(
+          "Sign out error:",
+          err instanceof Error ? err.message : "Unknown error"
+        );
       }
     }
   };
