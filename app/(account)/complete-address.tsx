@@ -8,6 +8,7 @@ import useAccount from "@/hooks/useAccount";
 import useKeyboardHeight from "@/hooks/useKeyboardHeight";
 import apiClient from "@/lib/api-client";
 import { getUserFriendlyErrorMessage, logError } from "@/lib/error-handler";
+import queryClient from "@/lib/query-client";
 import { AddressFormData, addressSchema } from "@/schemas";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "expo-router";
@@ -68,8 +69,10 @@ export default function CompleteAddressScreen() {
       if (currentUser?.address) {
         // Update existing address - no key generation
         await apiClient.put("/addresses", data);
+        queryClient.invalidateQueries({ queryKey: ["account"] });
       } else {
         await apiClient.post("/addresses", data);
+        queryClient.invalidateQueries({ queryKey: ["account"] });
       }
       if (currentUser?.accountStatus === "PENDING") {
         router.replace("/(account)/complete-kyc");

@@ -1,24 +1,25 @@
-import ThemeButton from "@/components/ui/ThemeButton";
-import ThemeTextInput from "@/components/ui/ThemeTextInput";
+import SignOutButton from "@/components/SignOutButton";
 import CountryPicker from "@/components/ui/CountryPicker";
 import DatePicker from "@/components/ui/DatePicker";
 import FormErrorMessage from "@/components/ui/FormErrorMessage";
-import { Mail } from "lucide-react-native";
-import SignOutButton from "@/components/SignOutButton";
+import ThemeButton from "@/components/ui/ThemeButton";
+import ThemeTextInput from "@/components/ui/ThemeTextInput";
+import { Country } from "@/constants/countries";
 import useAccount from "@/hooks/useAccount";
-import { useUser } from "@clerk/clerk-expo";
 import useKeyboardHeight from "@/hooks/useKeyboardHeight";
 import apiClient from "@/lib/api-client";
 import {
   generateAndStoreKeys,
-  hasExistingKeys,
   getPublicKey,
+  hasExistingKeys,
 } from "@/lib/key-generator";
+import queryClient from "@/lib/query-client";
 import { PersonalInfoFormData, personalInfoSchema } from "@/schemas";
-import { Country } from "@/constants/countries";
+import { useUser } from "@clerk/clerk-expo";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
+import { Mail } from "lucide-react-native";
 import * as React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ScrollView, Text, View } from "react-native";
@@ -103,20 +104,23 @@ export default function CompleteAccountScreen() {
         const { clerkUserId, ...updateData } = data;
         if (user.publicKey) {
           await apiClient.put("/users/update-user", updateData);
+          await queryClient.invalidateQueries({ queryKey: ["account"] });
         } else {
           const publicKey = await getOrGeneratePublicKey();
           await apiClient.put("/users/update-user", {
             ...updateData,
             publicKey,
           });
+          await queryClient.invalidateQueries({ queryKey: ["account"] });
         }
       } else {
         const publicKey = await getOrGeneratePublicKey();
         await apiClient.post("/users", { ...data, publicKey });
+        await queryClient.invalidateQueries({ queryKey: ["account"] });
       }
       router.push("/(account)/complete-address");
     } catch (err: unknown) {
-      console.error(err);
+      await queryClient.invalidateQueries({ queryKey: ["account"] });
       const errorMessage =
         err instanceof AxiosError && err.response
           ? err.response.data.message || "Something went wrong"

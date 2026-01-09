@@ -48,7 +48,7 @@ export default function SubmitAccountScreen() {
 
     try {
       await apiClient.post("/zynk/entities");
-      await queryClient.invalidateQueries({ queryKey: ["current"] });
+      await queryClient.invalidateQueries({ queryKey: ["account"] });
       router.replace("/(account)/complete-kyc");
     } catch (err) {
       if (err instanceof AxiosError && err.response) {
