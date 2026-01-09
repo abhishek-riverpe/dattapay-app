@@ -34,8 +34,6 @@ export default function CompleteAccountScreen() {
   const { data: account } = useAccount();
   const user = account?.data.user;
 
-  console.log("Current user:", user);
-
   const {
     control,
     handleSubmit,
