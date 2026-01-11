@@ -4,7 +4,8 @@ import EmptyState from "@/components/ui/EmptyState";
 import ThemeButton from "@/components/ui/ThemeButton";
 import useCreateWallet from "@/hooks/useCreateWallet";
 import useWallet from "@/hooks/useWallet";
-import { useState } from "react";
+import useWalletBalances from "@/hooks/useWalletBalances";
+import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -15,17 +16,15 @@ import {
 import * as Clipboard from "expo-clipboard";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Dummy balance for demo
-const AVAILABLE_BALANCE = 700;
-
-// Dummy crypto balances
-const CRYPTO_BALANCES = [
-  { symbol: "USDT", balance: 400, icon: require("@/assets/images/usdt.png") },
-  { symbol: "USDC", balance: 300, icon: require("@/assets/images/usdc.png") },
-];
+// Token icon mapping
+const TOKEN_ICONS: Record<string, ReturnType<typeof require>> = {
+  USDT: require("@/assets/images/usdt.png"),
+  USDC: require("@/assets/images/usdc.png"),
+};
 
 export default function FundScreen() {
   const { data: walletData, isLoading: isLoadingWallet } = useWallet();
+  const { data: balancesData, isLoading: isLoadingBalances } = useWalletBalances();
   const createWallet = useCreateWallet();
   const [error, setError] = useState<string | null>(null);
   const [showBankDetails, setShowBankDetails] = useState(false);
@@ -33,6 +32,20 @@ export default function FundScreen() {
 
   const wallet = walletData?.data;
   const hasWallet = wallet && walletData?.success;
+
+  // Extract token balances from API response
+  const tokenBalances = useMemo(() => {
+    if (!balancesData?.data?.accounts?.[0]?.balances) return [];
+    return balancesData.data.accounts[0].balances;
+  }, [balancesData]);
+
+  // Calculate total balance from all tokens
+  const totalBalance = useMemo(() => {
+    return tokenBalances.reduce((sum, token) => {
+      const balance = parseFloat(token.balance) / Math.pow(10, token.tokenDecimals);
+      return sum + balance;
+    }, 0);
+  }, [tokenBalances]);
 
   const handleCreateWallet = async () => {
     setError(null);
@@ -43,7 +56,7 @@ export default function FundScreen() {
     }
   };
 
-  if (isLoadingWallet) {
+  if (isLoadingWallet || isLoadingBalances) {
     return (
       <SafeAreaView className="flex-1 bg-gray-50 dark:bg-[#1A1A1A] items-center justify-center">
         <ActivityIndicator size="large" color="#005AEE" />
@@ -69,7 +82,9 @@ export default function FundScreen() {
           <View className="bg-white/10 rounded-2xl p-5 mt-4">
             <Text className="text-primary-100 text-sm mb-1">Total Balance</Text>
             <View className="flex-row items-center justify-between">
-              <Text className="text-white text-4xl font-bold">$700.00</Text>
+              <Text className="text-white text-4xl font-bold">
+                ${totalBalance.toFixed(2)}
+              </Text>
               <ThemeButton
                 variant="secondary"
                 size="sm"
@@ -142,25 +157,37 @@ export default function FundScreen() {
                   </Text>
 
                   <View className="gap-3">
-                    {CRYPTO_BALANCES.map((crypto) => (
-                      <View
-                        key={crypto.symbol}
-                        className="flex-row items-center justify-between bg-white dark:bg-gray-700 p-4 rounded-xl"
-                      >
-                        <View className="flex-row items-center">
-                          <Image
-                            source={crypto.icon}
-                            className="w-8 h-8 mr-3"
-                          />
-                          <Text className="text-gray-900 dark:text-white font-medium text-base">
-                            {crypto.symbol}
-                          </Text>
-                        </View>
-                        <Text className="text-gray-900 dark:text-white font-semibold text-lg">
-                          ${crypto.balance.toFixed(2)}
-                        </Text>
-                      </View>
-                    ))}
+                    {tokenBalances.length === 0 ? (
+                      <Text className="text-gray-500 dark:text-gray-400 text-center py-4">
+                        No token balances found
+                      </Text>
+                    ) : (
+                      tokenBalances.map((token) => {
+                        const balance = parseFloat(token.balance) / Math.pow(10, token.tokenDecimals);
+                        const icon = TOKEN_ICONS[token.tokenSymbol];
+                        return (
+                          <View
+                            key={token.tokenAddress}
+                            className="flex-row items-center justify-between bg-white dark:bg-gray-700 p-4 rounded-xl"
+                          >
+                            <View className="flex-row items-center">
+                              {icon && (
+                                <Image
+                                  source={icon}
+                                  className="w-8 h-8 mr-3"
+                                />
+                              )}
+                              <Text className="text-gray-900 dark:text-white font-medium text-base">
+                                {token.tokenSymbol}
+                              </Text>
+                            </View>
+                            <Text className="text-gray-900 dark:text-white font-semibold text-lg">
+                              ${balance.toFixed(2)}
+                            </Text>
+                          </View>
+                        );
+                      })
+                    )}
                   </View>
                 </View>
 
@@ -215,7 +242,7 @@ export default function FundScreen() {
       <WithdrawModal
         visible={showWithdraw}
         onClose={() => setShowWithdraw(false)}
-        availableBalance={AVAILABLE_BALANCE}
+        availableBalance={totalBalance}
       />
     </SafeAreaView>
   );

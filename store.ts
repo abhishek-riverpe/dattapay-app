@@ -2,6 +2,8 @@ import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
 import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
 
+const KYC_LINK_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
+
 // Custom secure storage adapter for Zustand
 const secureStorage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
@@ -15,7 +17,6 @@ const secureStorage: StateStorage = {
     try {
       await SecureStore.setItemAsync(name, value);
     } catch {
-      // SecureStore has a 2048 byte limit, handle gracefully
       console.warn("Failed to store data in SecureStore");
     }
   },
@@ -33,6 +34,7 @@ interface KycState {
   tosLink: string | null;
   kycStatus: string | null;
   tosStatus: string | null;
+  kycLinkCreatedAt: number | null;
   setKycData: (data: {
     kycLink: string;
     tosLink: string;
@@ -40,21 +42,24 @@ interface KycState {
     tosStatus: string;
   }) => void;
   clearKycData: () => void;
+  isKycLinkExpired: () => boolean;
 }
 
 export const useKycStore = create<KycState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       kycLink: null,
       tosLink: null,
       kycStatus: null,
       tosStatus: null,
+      kycLinkCreatedAt: null,
       setKycData: (data) =>
         set({
           kycLink: data.kycLink,
           tosLink: data.tosLink,
           kycStatus: data.kycStatus,
           tosStatus: data.tosStatus,
+          kycLinkCreatedAt: Date.now(),
         }),
       clearKycData: () =>
         set({
@@ -62,7 +67,13 @@ export const useKycStore = create<KycState>()(
           tosLink: null,
           kycStatus: null,
           tosStatus: null,
+          kycLinkCreatedAt: null,
         }),
+      isKycLinkExpired: () => {
+        const { kycLinkCreatedAt } = get();
+        if (!kycLinkCreatedAt) return true;
+        return Date.now() - kycLinkCreatedAt > KYC_LINK_EXPIRY_MS;
+      },
     }),
     {
       name: "kyc-storage",

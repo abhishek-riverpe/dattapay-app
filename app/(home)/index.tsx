@@ -8,9 +8,10 @@ import QuickAction from "@/components/ui/QuickAction";
 import ThemeButton from "@/components/ui/ThemeButton";
 import useAccount from "@/hooks/useAccount";
 import { useActivities } from "@/hooks/useActivities";
+import useWalletBalances from "@/hooks/useWalletBalances";
 import { useRouter } from "expo-router";
 import { AlertTriangle } from "lucide-react-native";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -25,12 +26,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 // Dummy avatar for demo
 const DUMMY_AVATAR = require("@/assets/images/avatar_2.jpg");
 
-// Dummy balance for demo
-const AVAILABLE_BALANCE = 500;
-
 export default function HomeScreen() {
   const { data: accountResponse } = useAccount();
   const account = accountResponse?.data;
+  const { data: balancesData } = useWalletBalances();
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showBankDetails, setShowBankDetails] = useState(false);
@@ -44,6 +43,15 @@ export default function HomeScreen() {
     isError: activitiesError,
   } = useActivities();
   const isAccountActive = account?.accountStatus === "ACTIVE";
+
+  // Calculate total balance from wallet balances
+  const totalBalance = useMemo(() => {
+    if (!balancesData?.data?.accounts?.[0]?.balances) return 0;
+    return balancesData.data.accounts[0].balances.reduce((sum, token) => {
+      const balance = parseFloat(token.balance) / Math.pow(10, token.tokenDecimals);
+      return sum + balance;
+    }, 0);
+  }, [balancesData]);
 
   // Get first 3 activities for recent activity section
   const recentActivities = (activities || []).slice(0, 10);
@@ -72,7 +80,9 @@ export default function HomeScreen() {
           {/* Balance Card */}
           <View className="bg-white/10 rounded-2xl p-5">
             <Text className="text-primary-100 text-sm mb-1">Total Balance</Text>
-            <Text className="text-white text-4xl font-bold">$0.00</Text>
+            <Text className="text-white text-4xl font-bold">
+              ${totalBalance.toFixed(2)}
+            </Text>
           </View>
         </View>
 
@@ -214,7 +224,7 @@ export default function HomeScreen() {
       <WithdrawModal
         visible={showWithdraw}
         onClose={() => setShowWithdraw(false)}
-        availableBalance={AVAILABLE_BALANCE}
+        availableBalance={totalBalance}
       />
 
       {/* Activity Details Modal */}

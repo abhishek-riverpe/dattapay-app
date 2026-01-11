@@ -28,7 +28,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function CompleteKYCScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
-  const { kycLink, tosLink, setKycData } = useKycStore();
+  const { kycLink, tosLink, setKycData, clearKycData, isKycLinkExpired } = useKycStore();
   const { data: currentUserResponse } = useAccount();
   const currentUser = currentUserResponse?.data;
   const isAccountActive = currentUser?.accountStatus === "PENDING";
@@ -40,6 +40,13 @@ export default function CompleteKYCScreen() {
     if (!currentUser?.user) return router.push("/(account)/complete-account");
     if (currentUser?.accountStatus === "ACTIVE") return router.push("/(home)");
   }, [currentUser]);
+
+  // Check expiration on mount and clear if expired
+  React.useEffect(() => {
+    if (kycLink && isKycLinkExpired()) {
+      clearKycData();
+    }
+  }, [kycLink, isKycLinkExpired, clearKycData]);
 
   const handleStartKYC = async () => {
     setIsLoading(true);
@@ -60,15 +67,7 @@ export default function CompleteKYCScreen() {
     }
   };
 
-  // Debug: Log KYC links
-  React.useEffect(() => {
-    console.log("=== KYC Links Debug ===");
-    console.log("KYC Link:", kycLink);
-    console.log("TOS Link:", tosLink);
-  }, [kycLink, tosLink]);
-
   const handleOpenKycLink = async () => {
-    console.log("Opening KYC Link:", kycLink);
     if (!kycLink) {
       Toast.show({
         type: "error",
@@ -81,7 +80,6 @@ export default function CompleteKYCScreen() {
     try {
       await WebBrowser.openBrowserAsync(kycLink);
     } catch (err) {
-      console.log("Error opening KYC link:", err);
       Toast.show({
         type: "error",
         text1: "Error",
@@ -91,7 +89,6 @@ export default function CompleteKYCScreen() {
   };
 
   const handleOpenTosLink = async () => {
-    console.log("Opening TOS Link:", tosLink);
     if (!tosLink) {
       Toast.show({
         type: "error",
@@ -104,7 +101,6 @@ export default function CompleteKYCScreen() {
     try {
       await WebBrowser.openBrowserAsync(tosLink);
     } catch (err) {
-      console.log("Error opening TOS link:", err);
       Toast.show({
         type: "error",
         text1: "Error",
@@ -218,20 +214,20 @@ export default function CompleteKYCScreen() {
                 <View className="gap-3">
                   <ThemeButton
                     variant="primary"
-                    onPress={handleOpenKycLink}
+                    onPress={handleOpenTosLink}
                     className="flex-row items-center justify-center gap-2"
                   >
-                    <FileCheck size={20} color="#fff" />
+                    <FileText size={20} color="#fff" />
                     <Text className="text-white font-semibold">
-                      Complete KYC Verification
+                      Accept Terms of Service
                     </Text>
                   </ThemeButton>
                   <ThemeButton
                     variant="secondary"
-                    onPress={handleOpenTosLink}
+                    onPress={handleOpenKycLink}
                     className="flex-row items-center justify-center gap-2"
                   >
-                    <FileText size={20} color={isDark ? "#fff" : "#005AEE"} />
+                    <FileCheck size={20} color={isDark ? "#fff" : "#005AEE"} />
                     <Text
                       className={
                         isDark
@@ -239,7 +235,7 @@ export default function CompleteKYCScreen() {
                           : "text-primary font-semibold"
                       }
                     >
-                      Accept Terms of Service
+                      Complete KYC Verification
                     </Text>
                   </ThemeButton>
                 </View>

@@ -266,7 +266,7 @@ export default function SignUpScreen() {
                     />
                     {!error && (
                       <Text className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                        Must be 8+ characters with uppercase, lowercase, number
+                        Must be 12+ characters with uppercase, lowercase, number
                         & special character
                       </Text>
                     )}
