@@ -8,7 +8,7 @@ const useAccount = () =>
     queryKey: ["account"],
     queryFn: () =>
       apiClient.get<APIResponse<Account>>("/account").then((res) => res.data),
-    refetchInterval: 60_000,
+    refetchInterval: 2 * 60 * 1000, // 2 minutes
   });
 
 export default useAccount;
