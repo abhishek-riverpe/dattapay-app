@@ -35,7 +35,7 @@ const useFundingAccount = () =>
     queryKey: fundingAccountQueryKey,
     queryFn: () =>
       apiClient
-        .get<FundingAccountResponse>("/api/zynk/funding-account")
+        .get<FundingAccountResponse>("/zynk/funding-account")
         .then((res) => res.data),
     retry: false,
   });
