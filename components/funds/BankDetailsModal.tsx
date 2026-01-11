@@ -1,18 +1,10 @@
 import { View, Text, Pressable, Modal, ScrollView, ActivityIndicator } from "react-native";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { X, Copy, CheckCircle, Info, Share2, AlertCircle } from "lucide-react-native";
 import * as Clipboard from "expo-clipboard";
 import * as Sharing from "expo-sharing";
 import ThemeButton from "@/components/ui/ThemeButton";
-import apiClient from "@/lib/api-client";
-
-interface BankDetails {
-  accountHolderName: string;
-  bankName: string;
-  routingNumber: string;
-  accountNumber: string;
-  reference: string;
-}
+import useFundingAccount from "@/hooks/useFundingAccount";
 
 interface BankDetailsModalProps {
   visible: boolean;
@@ -66,28 +58,16 @@ export default function BankDetailsModal({
   onClose,
 }: Readonly<BankDetailsModalProps>) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [bankDetails, setBankDetails] = useState<BankDetails | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, isError, refetch } = useFundingAccount();
 
-  useEffect(() => {
-    if (visible && !bankDetails) {
-      fetchBankDetails();
-    }
-  }, [visible]);
-
-  const fetchBankDetails = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await apiClient.get("/api/bank-details");
-      setBankDetails(response.data.data);
-    } catch {
-      setError("Failed to load bank details. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Map the funding account response to bank details format
+  const bankDetails = data?.data ? {
+    accountHolderName: data.data.accountInfo.bank_beneficiary_name,
+    bankName: data.data.accountInfo.bank_name,
+    routingNumber: data.data.accountInfo.bank_routing_number,
+    accountNumber: data.data.accountInfo.bank_account_number,
+    reference: data.data.id,
+  } : null;
 
   const copyField = async (field: string, value: string) => {
     await Clipboard.setStringAsync(value);
@@ -140,11 +120,11 @@ Reference/Memo (Required): ${bankDetails.reference}`;
     <View className="items-center justify-center py-12">
       <AlertCircle size={48} color="#EF4444" />
       <Text className="text-red-500 dark:text-red-400 mt-4 text-center">
-        {error}
+        Failed to load bank details. Please try again.
       </Text>
       <ThemeButton
         variant="secondary"
-        onPress={fetchBankDetails}
+        onPress={() => refetch()}
         className="mt-4"
       >
         Retry
@@ -230,7 +210,7 @@ Reference/Memo (Required): ${bankDetails.reference}`;
 
   const renderContent = () => {
     if (isLoading) return renderLoading();
-    if (error) return renderError();
+    if (isError) return renderError();
     if (bankDetails) return renderDetails();
     return null;
   };
